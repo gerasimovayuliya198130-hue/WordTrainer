@@ -1,0 +1,3314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Trainer</title>
+<style>
+/* ====== 1. БАЗОВЫЕ СТИЛИ И СБРОС ====== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  min-height: 100vh; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  background-image: url('картинки/ui/images.jpeg'); 
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat; 
+  background-color: #e8edf2; 
+  padding: 10px; 
+}
+
+.menu-overlay { 
+  background: rgba(255, 255, 255, 0.88); 
+  backdrop-filter: blur(6px); 
+  -webkit-backdrop-filter: blur(6px); 
+  border-radius: 60px; 
+  padding: 30px 40px 35px; 
+  max-width: 600px; 
+  width: 100%; 
+  text-align: center; 
+  border: 1px solid rgba(255, 255, 255, 0.5); 
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15); 
+  position: relative; 
+  z-index: 2; 
+}
+
+.robot-area { 
+  margin-bottom: 10px; 
+  min-height: 80px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  width: 140px; 
+  height: 160px; 
+  margin: 0 auto 10px; 
+}
+.robot-area > div { width: 100%; height: 100%; }
+
+.logo { 
+  font-size: 36px; 
+  font-weight: 800; 
+  color: #1a1a2e; 
+  letter-spacing: 3px; 
+  text-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+  margin-bottom: 5px; 
+  line-height: 1.1; 
+}
+.logo-sub { 
+  font-size: 16px; 
+  font-weight: 300; 
+  color: #555; 
+  letter-spacing: 5px; 
+  text-transform: uppercase; 
+  margin-bottom: 25px; 
+  border-bottom: 1px solid rgba(0,0,0,0.06); 
+  padding-bottom: 15px; 
+}
+
+.buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.btn { 
+  padding: 14px 20px; 
+  border: none; 
+  border-radius: 50px; 
+  font-size: 20px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  letter-spacing: 3px; 
+  text-transform: uppercase; 
+}
+.btn-start { background: #1a1a2e; color: #fff; box-shadow: 0 6px 0 #0d0d1a; }
+.btn-start:hover { transform: scale(1.02); background: #2d2d4a; }
+.btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 #0d0d1a; }
+.btn-choose { background: rgba(0,0,0,0.06); color: #1a1a2e; border: 2px solid rgba(0,0,0,0.12); box-shadow: 0 6px 0 rgba(0,0,0,0.06); }
+.btn-choose:hover { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.2); }
+.btn-choose:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+.btn-reset { background: #e74c3c; color: #fff; border: 2px solid #c0392b; box-shadow: 0 6px 0 #a12a2a; }
+.btn-reset:hover { background: #ff6b6b; border-color: #e74c3c; }
+.btn-reset:active { transform: translateY(4px); box-shadow: 0 2px 0 #a12a2a; }
+
+.footer-info { display: flex; justify-content: center; gap: 30px; color: #666; font-size: 13px; flex-wrap: wrap; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 15px; }
+.footer-info span { color: #1a1a2e; font-weight: 600; }
+
+/* ====== 2. ИКОНКИ И ХИНТЫ ====== */
+.hint-icon {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  vertical-align: -8px;
+  margin-right: 7px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+.hint-icon.icon-drag    { background-image: url('картинки/ui/icon_drag.png'); }
+.hint-icon.icon-time    { background-image: url('картинки/ui/icon_time.png'); }
+.hint-icon.icon-write   { background-image: url('картинки/ui/icon_write.png'); }
+.hint-icon.icon-warning { background-image: url('картинки/ui/icon_warning.png'); }
+.hint-icon.icon-click   { background-image: url('картинки/ui/icon_click.png'); }
+.hint-icon.icon-check   { background-image: url('картинки/ui/icon_check.png'); }
+.hint-icon.icon-cross   { background-image: url('картинки/ui/icon_cross.png'); }
+.hint-icon.icon-star    { background-image: url('картинки/ui/icon_star.png'); }
+.hint-icon.lg { width: 22px; height: 22px; margin-right: 8px; }
+.hint-icon.xl { width: 48px; height: 48px; margin-right: 0; }
+
+.theme-check-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background-image: url('картинки/ui/icon_check.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-top: 2px;
+}
+
+/* ====== 3. ОВЕРЛЕИ И ВЫБОР ТЕМ ====== */
+.choose-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
+.choose-overlay.active { display: flex; }
+.choose-box { background: rgba(255,255,255,0.95); border-radius: 50px; padding: 25px 30px 25px; max-width: 820px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 90vh; display: flex; flex-direction: column; position: relative; }
+.choose-back-wrap { position: absolute; top: 20px; left: 25px; z-index: 10; }
+.choose-back-wrap .btn-back-game { background: none; border: none; cursor: pointer; padding: 0; transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center; }
+.choose-back-wrap .btn-back-game:hover { transform: scale(1.1); }
+.choose-back-wrap .btn-back-game img { width: 44px; height: 44px; object-fit: contain; display: block; }
+.choose-box h2 { color: #1a1a2e; font-size: 30px; font-weight: 700; letter-spacing: 3px; margin-bottom: 10px; flex-shrink: 0; }
+.theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 15px; overflow-y: auto; padding: 8px 4px; scrollbar-width: thin; scrollbar-color: #ccc transparent; flex-grow: 1; }
+.theme-grid::-webkit-scrollbar { width: 4px; }
+.theme-grid::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+.theme-card { background: rgba(255,255,255,0.8); border-radius: 16px; padding: 10px 6px 8px; cursor: pointer; transition: all 0.2s ease; border: 3px solid transparent; text-align: center; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.theme-card:hover { background: rgba(255,255,255,0.95); transform: translateY(-2px); border-color: rgba(0,0,0,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.theme-card.active { border-color: #1a1a2e; background: #ffffff; box-shadow: 0 0 25px rgba(0,0,0,0.1); }
+.theme-card img { width: 130px; height: 130px; object-fit: contain; display: block; border-radius: 16px; background: transparent; }
+.theme-card .name { color: #1a1a2e; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; text-align: center; word-break: break-word; max-width: 100%; line-height: 1.2; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 10px; flex-shrink: 0; }
+.nav-btn { background: none; border: none; cursor: pointer; padding: 5px; transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center; }
+.nav-btn:hover { transform: scale(1.1); }
+.nav-btn img { width: 40px; height: 40px; object-fit: contain; display: block; }
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+.page-indicator { color: #666; font-size: 16px; font-weight: 600; letter-spacing: 1px; }
+
+/* ====== 4. LEARN OVERLAY ====== */
+.learn-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.learn-overlay.active { display: flex; }
+.learn-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 20px 35px 25px; max-width: 820px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 90vh; display: flex; flex-direction: column; position: relative; }
+.learn-header { display: flex; justify-content: space-between; align-items: center; padding: 0 0 5px 0; flex-shrink: 0; gap: 10px; }
+.learn-header-left { display: flex; align-items: center; flex: 0 0 auto; }
+.learn-header-center { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 0px; }
+.learn-header-center .learn-title { font-size: 28px; font-weight: 700; color: #1a1a2e; letter-spacing: 2px; line-height: 1.2; }
+.learn-header-center .learn-sub { font-size: 14px; color: #666; font-weight: 400; }
+.learn-header-right { display: flex; align-items: center; flex: 0 0 auto; }
+.btn-back-game, .btn-sound { background: none; border: none; cursor: pointer; padding: 0; transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center; }
+.btn-back-game:hover, .btn-sound:hover { transform: scale(1.1); }
+.btn-back-game img, .btn-sound img { width: 44px; height: 44px; object-fit: contain; display: block; }
+.learn-grid-wrap { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+.learn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 10px 0 12px; overflow-y: auto; padding: 4px 2px; flex-grow: 1; scrollbar-width: thin; scrollbar-color: #ccc transparent; }
+.learn-grid::-webkit-scrollbar { width: 4px; }
+.learn-grid::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+.learn-card { position: relative; background: rgba(255,255,255,0.8); border-radius: 20px; padding: 12px 8px 10px; cursor: pointer; transition: all 0.2s ease; border: 3px solid transparent; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); min-height: 100px; }
+.learn-card:hover { background: rgba(255,255,255,0.95); transform: translateY(-2px); border-color: rgba(0,0,0,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.learn-card.listening { border-color: #f5c842; background: #fff8e1; box-shadow: 0 0 25px rgba(245,200,66,0.2); }
+.learn-card .translate-btn { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; cursor: pointer; z-index: 5; opacity: 0.7; transition: opacity 0.2s ease, transform 0.2s ease; background: none; border: none; padding: 0; }
+.learn-card .translate-btn:hover { opacity: 1; transform: scale(1.1); }
+.learn-card .translate-btn img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 4px; background: transparent; }
+.learn-card .translation { font-size: 12px; color: #666; margin-top: 2px; font-weight: 400; opacity: 0; transition: opacity 0.5s ease; }
+.learn-card .translation.show { opacity: 1; color: #1a1a2e; font-weight: 500; }
+.learn-card img { width: 130px; height: 130px; object-fit: contain; display: block; border-radius: 16px; background: transparent; }
+.learn-card .name { color: #1a1a2e; font-size: 14px; font-weight: 600; }
+.learn-nav { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-shrink: 0; padding: 4px 0; }
+.learn-nav .nav-btn img { width: 34px; height: 34px; }
+.learn-page { color: #666; font-size: 15px; font-weight: 600; }
+.learn-actions { display: flex; gap: 12px; flex-shrink: 0; padding-top: 6px; }
+.learn-actions .btn { flex: 1; padding: 12px 16px; font-size: 16px; }
+.btn-learn-play { background: #2ecc71; color: #fff; box-shadow: 0 6px 0 #1a7a44; }
+.btn-learn-play:hover { transform: scale(1.02); background: #3ddc84; }
+.btn-learn-play:active { transform: translateY(4px); box-shadow: 0 2px 0 #1a7a44; }
+.btn-learn-choose { background: rgba(0,0,0,0.06); color: #1a1a2e; border: 2px solid rgba(0,0,0,0.12); box-shadow: 0 6px 0 rgba(0,0,0,0.06); }
+.btn-learn-choose:hover { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.2); }
+.btn-learn-choose:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+.btn-learn-write { background: #5bc8e8; color: #fff; border: 2px solid #2f7ea0; box-shadow: 0 6px 0 #2f7ea0; }
+.btn-learn-write:hover { background: #7dd8f0; border-color: #2f7ea0; }
+.btn-learn-write:active { transform: translateY(4px); box-shadow: 0 2px 0 #2f7ea0; }
+
+/* ====== 5. GAME 1: CLICK ====== */
+.game-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.game-overlay.active { display: flex; }
+.game-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 20px 35px 25px; max-width: 900px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 92vh; display: flex; flex-direction: column; position: relative; }
+.game-header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px 8px 12px; flex-shrink: 0; gap: 10px; min-height: 130px; }
+.game-header-left { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.game-header-left .score-block { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: 6px; margin-left: 60px; }
+.game-header-left .score-label { font-size: 13px; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+.game-header-left .score-value { font-size: 28px; font-weight: 800; color: #1a1a2e; line-height: 1; }
+.game-header-robot { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 130px; height: 140px; display: flex; justify-content: center; align-items: center; z-index: 3; pointer-events: auto; }
+.game-header-right { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.game-header-right .timer-container { margin-top: 4px; margin-right: 60px; }
+.timer-container { display: flex; justify-content: center; align-items: center; }
+.timer-svg { transform: rotate(-90deg); width: 56px; height: 56px; }
+.timer-svg circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+.timer-bg { stroke: rgba(0,0,0,0.08); }
+.timer-progress { stroke: #f5c842; stroke-dasharray: 157.08; stroke-dashoffset: 0; transition: stroke-dashoffset 0.3s linear; }
+.timer-progress.warning { stroke: #e67e22; }
+.timer-progress.danger { stroke: #e74c3c; }
+.timer-text { font-size: 16px; font-weight: 700; fill: #1a1a2e; transform: rotate(90deg); }
+.game-word { font-size: 52px; font-weight: 800; color: #1a1a2e; background: rgba(0,0,0,0.05); padding: 8px 36px; border-radius: 40px; display: inline-block; margin-bottom: 6px; min-height: 70px; letter-spacing: 2px; }
+.game-hint { color: #666; font-size: 16px; min-height: 24px; margin-bottom: 8px; }
+.game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 12px 0 14px; flex-grow: 1; }
+.game-card { background: rgba(255,255,255,0.8); border-radius: 20px; padding: 14px; cursor: pointer; transition: all 0.2s ease; border: 4px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 190px; }
+.game-card:hover { background: rgba(255,255,255,0.95); transform: translateY(-3px); border-color: rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+.game-card.correct { border-color: #2ecc71; background: #d5f5e3; box-shadow: 0 0 30px rgba(46,204,113,0.3); }
+.game-card.wrong { border-color: #e74c3c; background: #fadbd8; box-shadow: 0 0 30px rgba(231,76,60,0.3); }
+.game-card.disabled { pointer-events: none; opacity: 0.5; }
+.game-card img { width: 160px; height: 160px; object-fit: contain; display: block; border-radius: 16px; background: transparent; }
+.game-progress { background: rgba(0,0,0,0.06); border-radius: 30px; height: 10px; overflow: hidden; margin: 4px 0 8px; flex-shrink: 0; }
+.game-progress-bar { height: 100%; width: 0%; background: #f5c842; border-radius: 30px; transition: width 0.3s ease; }
+.game-progress-text { color: #666; font-size: 14px; margin-bottom: 4px; flex-shrink: 0; }
+
+/* ====== 6. GAME 2: DRAG ====== */
+.drag-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.drag-overlay.active { display: flex; }
+.drag-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 20px 40px 25px; max-width: 1100px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 92vh; min-height: 650px; display: flex; flex-direction: column; position: relative; }
+.drag-header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px 6px 12px; flex-shrink: 0; gap: 10px; min-height: 105px; }
+.drag-header-left { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.drag-header-left .score-block { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: 6px; margin-left: 60px; }
+.drag-header-left .score-label { font-size: 13px; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+.drag-header-left .score-value { font-size: 28px; font-weight: 800; color: #1a1a2e; line-height: 1; }
+.drag-header-right { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.drag-header-right .timer-container { margin-top: 4px; }
+.drag-robot { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 100px; height: 110px; display: flex; justify-content: center; align-items: center; z-index: 3; }
+.drag-hint-text { color: #666; font-size: 14px; min-height: 18px; margin-bottom: 4px; flex-shrink: 0; }
+.drag-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: visible; padding: 8px; min-height: 0; max-height: 72vh; margin-top: 20px; }
+.drag-left-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 6px; align-content: start; min-height: 0; }
+.drag-image-item { width: 100%; aspect-ratio: 1/1; max-width: 200px; background: rgba(255,255,255,0.9); border-radius: 20px; border: 3px solid #ddd; display: flex; align-items: center; justify-content: center; cursor: grab; transition: all 0.3s ease; margin: 0 auto; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.drag-image-item:hover { transform: scale(1.06) rotate(-2deg); border-color: #3498db; box-shadow: 0 6px 20px rgba(52,152,219,0.25); }
+.drag-image-item.dragging { opacity: 0.4; border-color: #3498db; transform: scale(0.95); }
+.drag-image-item.placed { opacity: 0.15; cursor: default; pointer-events: none; border-color: #2ecc71; transform: scale(0.9); }
+.drag-image-item img { width: 80%; height: 80%; object-fit: contain; border-radius: 12px; pointer-events: none; user-select: none; -webkit-user-drag: none; background: transparent; }
+.drag-right-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 6px; align-content: start; min-height: 0; }
+.drag-drop-item { width: 100%; aspect-ratio: 1/1; max-width: 200px; background: rgba(255,255,255,0.5); border-radius: 20px; border: 3px dashed #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; margin: 0 auto; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.drag-drop-item.drag-over { border-color: #3498db; background: rgba(52,152,219,0.08); transform: scale(1.05); }
+.drag-drop-item.correct { border-color: #2ecc71; background: rgba(46,204,113,0.15); border-style: solid; }
+.drag-drop-item.wrong { border-color: #e74c3c; background: rgba(231,76,60,0.15); border-style: solid; }
+.drag-drop-item.filled { border-style: solid; border-color: #2ecc71; background: rgba(46,204,113,0.1); }
+.drag-drop-item .drop-hint { font-size: 32px; color: #ccc; }
+.drag-drop-item .word-label { font-size: 18px; font-weight: 700; color: #1a1a2e; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(255,255,255,0.9); padding: 4px 14px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.drag-drop-item img { width: 80%; height: 80%; object-fit: contain; border-radius: 12px; pointer-events: none; user-select: none; -webkit-user-drag: none; background: transparent; }
+.drag-item-shift { margin-top: 50px; }
+.drag-progress { background: rgba(0,0,0,0.06); border-radius: 30px; height: 8px; overflow: hidden; margin: 6px 0 4px; flex-shrink: 0; }
+.drag-progress-bar { height: 100%; width: 0%; background: #3498db; border-radius: 30px; transition: width 0.3s ease; }
+.drag-progress-text { color: #666; font-size: 13px; margin-bottom: 2px; flex-shrink: 0; }
+
+/* ====== 7. GAME 3: CHOOSE ====== */
+.choose-overlay-game { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.choose-overlay-game.active { display: flex; }
+.choose-game-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 20px 40px 30px; max-width: 850px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 90vh; min-height: 450px; display: flex; flex-direction: column; position: relative; }
+.choose-game-header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px 6px 12px; flex-shrink: 0; gap: 10px; min-height: 120px; }
+.choose-game-header-left { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.choose-game-header-left .score-block { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: 6px; margin-left: 60px; }
+.choose-game-header-left .score-label { font-size: 13px; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+.choose-game-header-left .score-value { font-size: 28px; font-weight: 800; color: #1a1a2e; line-height: 1; }
+.choose-game-header-right { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.choose-game-header-right .timer-container { margin-top: 4px; margin-right: 60px; }
+.choose-game-robot { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 120px; height: 130px; display: flex; justify-content: center; align-items: center; z-index: 3; }
+.choose-game-area { display: flex; gap: 40px; flex: 1; align-items: center; justify-content: center; padding: 10px 0; min-height: 0; }
+.choose-game-image { flex: 0 0 280px; max-width: 280px; aspect-ratio: 1/1; background: rgba(255,255,255,0.9); border-radius: 30px; border: 4px solid #ddd; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.choose-game-image img { width: 85%; height: 85%; object-fit: contain; border-radius: 16px; background: transparent; }
+.choose-game-options { flex: 1; display: flex; flex-direction: column; gap: 14px; max-width: 320px; }
+.choose-game-option { background: rgba(255,255,255,0.8); border-radius: 20px; padding: 16px 24px; cursor: pointer; transition: all 0.3s ease; border: 4px solid transparent; text-align: center; font-size: 24px; font-weight: 700; color: #1a1a2e; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; min-height: 60px; width: 100%; letter-spacing: 1px; }
+.choose-game-option:hover { background: rgba(52,152,219,0.12); transform: translateY(-2px) scale(1.02); border-color: rgba(52,152,219,0.3); box-shadow: 0 8px 25px rgba(52,152,219,0.15); }
+.choose-game-option.correct { border-color: #2ecc71; background: #d5f5e3; box-shadow: 0 0 30px rgba(46,204,113,0.3); }
+.choose-game-option.wrong { border-color: #e74c3c; background: #fadbd8; box-shadow: 0 0 30px rgba(231,76,60,0.3); }
+.choose-game-option.disabled { pointer-events: none; opacity: 0.5; }
+.choose-game-progress { background: rgba(0,0,0,0.06); border-radius: 30px; height: 8px; overflow: hidden; margin: 8px 0 4px; flex-shrink: 0; }
+.choose-game-progress-bar { height: 100%; width: 0%; background: #f5c842; border-radius: 30px; transition: width 0.3s ease; }
+.choose-game-progress-text { color: #666; font-size: 13px; margin-bottom: 2px; flex-shrink: 0; }
+
+/* ====== 8. GAME 4: SPELLING ====== */
+.spelling-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.spelling-overlay.active { display: flex; }
+.spelling-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 20px 40px 25px; max-width: 850px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 90vh; min-height: 480px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.spelling-header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px 4px 12px; flex-shrink: 0; gap: 10px; min-height: 130px; }
+.spelling-header-left { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.spelling-header-left .score-block { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: 6px; margin-left: 60px; }
+.spelling-header-left .score-label { font-size: 13px; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+.spelling-header-left .score-value { font-size: 28px; font-weight: 800; color: #1a1a2e; line-height: 1; }
+.spelling-header-right { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.spelling-header-robot { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 120px; height: 130px; display: flex; justify-content: center; align-items: center; z-index: 3; }
+.spelling-word-show { font-size: 42px; font-weight: 800; color: #1a1a2e; text-align: center; padding: 0 0 6px; min-height: 55px; letter-spacing: 6px; flex-shrink: 0; transition: all 0.5s ease; }
+.spelling-word-show.hidden { opacity: 0; transform: scale(0.8); min-height: 0; padding: 0; margin: 0; }
+.spelling-track { position: relative; height: 150px; background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.07)); border-radius: 30px; margin: 6px 0 12px; overflow: hidden; flex-shrink: 0; border: 2px solid rgba(0,0,0,0.06); }
+.spelling-robot-runner { position: absolute; top: 50%; left: -110px; transform: translate(0, -50%); width: 90px; height: 110px; z-index: 5; pointer-events: none; }
+.spelling-track-letters { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; gap: 18px; z-index: 1; }
+.spelling-track-letter { width: 75px; height: 75px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: #1a1a2e; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: all 0.4s ease; position: relative; cursor: pointer; border: 3px solid transparent; background: linear-gradient(145deg, #ffffff, #f0f3f6); }
+.spelling-track-letter:nth-child(8n+1) { background: linear-gradient(145deg, #ff9a9e, #fad0c4); border-color: #ff6b6b; }
+.spelling-track-letter:nth-child(8n+2) { background: linear-gradient(145deg, #a18cd1, #fbc2eb); border-color: #9b59b6; }
+.spelling-track-letter:nth-child(8n+3) { background: linear-gradient(145deg, #fbc2eb, #a6c1ee); border-color: #5b86e5; }
+.spelling-track-letter:nth-child(8n+4) { background: linear-gradient(145deg, #84fab0, #8fd3f4); border-color: #2ecc71; }
+.spelling-track-letter:nth-child(8n+5) { background: linear-gradient(145deg, #fddb92, #d1fdff); border-color: #f39c12; }
+.spelling-track-letter:nth-child(8n+6) { background: linear-gradient(145deg, #ffecd2, #fcb69f); border-color: #e67e22; }
+.spelling-track-letter:nth-child(8n+7) { background: linear-gradient(145deg, #a1c4fd, #c2e9fb); border-color: #3498db; }
+.spelling-track-letter:nth-child(8n+8) { background: linear-gradient(145deg, #f093fb, #f5576c); border-color: #e74c3c; }
+.spelling-track-letter:hover { transform: translateY(-6px) scale(1.08); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+.spelling-track-letter.hit { animation: hitEffect 0.5s ease; border-color: #2ecc71; background: linear-gradient(145deg, #d5f5e3, #a9dfbf); transform: scale(0.7); opacity: 0.2; cursor: default; pointer-events: none; }
+.spelling-track-letter.wrong-hit { animation: wrongHitEffect 0.5s ease; border-color: #e74c3c; background: linear-gradient(145deg, #fadbd8, #f5b7b1); }
+
+@keyframes hitEffect { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.8; } 100% { transform: scale(0.7); opacity: 0.2; } }
+@keyframes wrongHitEffect { 0% { transform: scale(1); } 30% { transform: scale(1.2) rotate(-10deg); } 60% { transform: scale(1.2) rotate(10deg); } 100% { transform: scale(1); } }
+
+.spelling-slots { display: flex; justify-content: center; gap: 14px; margin: 10px 0 12px; flex-shrink: 0; flex-wrap: wrap; }
+.spelling-slot { width: 75px; height: 82px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; color: #1a1a2e; transition: all 0.4s ease; border: 3px solid transparent; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+.spelling-slot.empty { border-color: rgba(0,0,0,0.08); background: linear-gradient(145deg, #e8edf2, #d5dce6); }
+.spelling-slot.filled { border-color: #2ecc71; background: linear-gradient(145deg, #d5f5e3, #a9dfbf); box-shadow: 0 4px 25px rgba(46,204,113,0.25); animation: slotFill 0.3s ease; }
+.spelling-slot.wrong { border-color: #e74c3c; background: linear-gradient(145deg, #fadbd8, #f5b7b1); animation: slotWrong 0.5s ease; }
+.spelling-slot.highlight { border-color: #f5c842; background: linear-gradient(145deg, #fef9e7, #f9e79f); box-shadow: 0 0 35px rgba(245,200,66,0.3); animation: pulse 0.6s ease-in-out infinite alternate; }
+
+@keyframes slotFill { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes slotWrong { 0% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-10px); } 80% { transform: translateX(10px); } 100% { transform: translateX(0); } }
+@keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.06); } }
+
+.spelling-progress { background: rgba(0,0,0,0.06); border-radius: 30px; height: 8px; overflow: hidden; margin: 8px 0 4px; flex-shrink: 0; }
+.spelling-progress-bar { height: 100%; width: 0%; background: #9b59b6; border-radius: 30px; transition: width 0.3s ease; }
+.spelling-progress-text { color: #666; font-size: 13px; margin-bottom: 2px; flex-shrink: 0; }
+
+/* ====== 9. GAME 5: WRITING ====== */
+.writing-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+.writing-overlay.active { display: flex; }
+.writing-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 20px 40px 25px; max-width: 750px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 92vh; min-height: 500px; display: flex; flex-direction: column; position: relative; }
+.writing-header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px 4px 12px; flex-shrink: 0; gap: 10px; min-height: 130px; }
+.writing-header-left { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.writing-header-left .score-block { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: 6px; margin-left: 60px; }
+.writing-header-left .score-label { font-size: 13px; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+.writing-header-left .score-value { font-size: 28px; font-weight: 800; color: #1a1a2e; line-height: 1; }
+.writing-header-right { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
+.writing-header-robot { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 120px; height: 130px; display: flex; justify-content: center; align-items: center; z-index: 3; }
+.writing-image-wrap { flex: 1; display: flex; align-items: center; justify-content: center; margin: 8px 0 12px; min-height: 180px; }
+.writing-image-wrap img { max-width: 240px; max-height: 240px; object-fit: contain; border-radius: 24px; background: rgba(255,255,255,0.9); padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 3px solid #ddd; transition: all 0.3s ease; }
+.writing-hint-text { color: #666; font-size: 16px; min-height: 22px; margin-bottom: 12px; flex-shrink: 0; }
+.writing-input-wrap { display: flex; gap: 10px; margin-bottom: 12px; flex-shrink: 0; }
+.writing-input { flex: 1; padding: 14px 20px; border-radius: 50px; border: 3px solid rgba(0,0,0,0.1); font-size: 22px; font-weight: 600; text-align: center; color: #1a1a2e; outline: none; transition: all 0.2s ease; letter-spacing: 2px; font-family: inherit; }
+.writing-input:focus { border-color: #5bc8e8; box-shadow: 0 0 0 4px rgba(91,200,232,0.15); }
+.writing-input.correct { border-color: #2ecc71; background: #d5f5e3; }
+.writing-input.wrong { border-color: #e74c3c; background: #fadbd8; }
+.writing-input.almost { border-color: #f39c12; background: #fef5e7; }
+.writing-submit-btn { padding: 14px 30px; font-size: 16px; background: #1a1a2e; color: #fff; border-radius: 50px; box-shadow: 0 6px 0 #0d0d1a; border: none; cursor: pointer; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.writing-submit-btn:hover { transform: scale(1.02); background: #2d2d4a; }
+.writing-submit-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #0d0d1a; }
+.writing-submit-btn:disabled { opacity: 0.5; pointer-events: none; }
+.writing-feedback { min-height: 50px; font-size: 18px; font-weight: 600; margin-bottom: 8px; transition: all 0.3s ease; flex-shrink: 0; }
+.writing-feedback.correct { color: #2ecc71; }
+.writing-feedback.wrong { color: #e74c3c; }
+.writing-feedback.almost { color: #f39c12; }
+.writing-progress { background: rgba(0,0,0,0.06); border-radius: 30px; height: 8px; overflow: hidden; margin: 8px 0 4px; flex-shrink: 0; }
+.writing-progress-bar { height: 100%; width: 0%; background: #5bc8e8; border-radius: 30px; transition: width 0.3s ease; }
+.writing-progress-text { color: #666; font-size: 13px; margin-bottom: 2px; flex-shrink: 0; }
+
+/* ====== 10. WRITING EXPLANATION ====== */
+.writing-explanation-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 3000; justify-content: center; align-items: center; padding: 20px; }
+.writing-explanation-overlay.active { display: flex; }
+.writing-explanation-box { background: #ffffff; border-radius: 40px; padding: 30px 40px 30px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.5); animation: explanationPop 0.4s ease-out; }
+@keyframes explanationPop { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.writing-explanation-icon { font-size: 64px; margin-bottom: 10px; line-height: 1; display: flex; justify-content: center; align-items: center; min-height: 64px; }
+.writing-explanation-title { font-size: 32px; font-weight: 800; margin-bottom: 15px; letter-spacing: 1px; }
+.writing-explanation-title.almost  { color: #f39c12; }
+.writing-explanation-title.wrong   { color: #e74c3c; }
+.writing-explanation-text { font-size: 18px; color: #333; line-height: 1.6; margin-bottom: 25px; padding: 15px 20px; background: rgba(0,0,0,0.04); border-radius: 20px; }
+.writing-explanation-text b { color: #1a1a2e; font-weight: 800; }
+.writing-explanation-btn { padding: 14px 40px; font-size: 18px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: none; border-radius: 50px; cursor: pointer; transition: all 0.2s ease; }
+.writing-explanation-btn.almost  { background: #f39c12; color: #fff; box-shadow: 0 6px 0 #a16807; }
+.writing-explanation-btn.wrong   { background: #e74c3c; color: #fff; box-shadow: 0 6px 0 #a12a2a; }
+.writing-explanation-btn:hover { transform: scale(1.03); }
+.writing-explanation-btn:active { transform: translateY(4px); box-shadow: none; }
+
+/* ====== 11. GAME OVER ====== */
+.gameover-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+.gameover-overlay.active { display: flex; }
+.gameover-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 25px 35px 25px; max-width: 620px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.3); position: relative; display: flex; flex-direction: column; align-items: center; }
+.gameover-header { display: flex; justify-content: center; align-items: center; padding: 0 0 5px 0; flex-shrink: 0; position: relative; width: 100%; }
+.gameover-header .gameover-title { font-size: 32px; font-weight: 800; color: #e74c3c; letter-spacing: 2px; margin: 0; display: flex; align-items: center; gap: 10px; }
+.gameover-header .gameover-sound { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
+.gameover-subtitle { font-size: 15px; color: #666; margin-bottom: 20px; text-align: center; }
+.gameover-content-row { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px; transform: translateX(40px); position: relative; }
+.gameover-image-wrapper { display: inline-block; position: relative; }
+.gameover-image-wrapper img { width: 150px; height: 150px; object-fit: contain; border-radius: 20px; cursor: pointer; transition: transform 0.3s ease; border: 3px solid #e74c3c; box-shadow: 0 0 30px rgba(231,76,60,0.2); display: block; background: transparent; }
+.gameover-image-wrapper img:hover { transform: scale(1.05); }
+.gameover-translate-btn { position: absolute; top: -10px; right: -10px; width: 36px; height: 36px; cursor: pointer; z-index: 10; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+.gameover-translate-btn:hover { transform: scale(1.1); }
+.gameover-translate-btn img { width: 24px; height: 24px; border: none; box-shadow: none; }
+.gameover-arrow { background: none; border: none; cursor: pointer; padding: 5px; transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.gameover-arrow:hover { transform: scale(1.1); }
+.gameover-arrow img { width: 44px; height: 44px; object-fit: contain; display: block; }
+.gameover-word-below { font-size: 22px; font-weight: 700; color: #1a1a2e; cursor: pointer; margin-top: 4px; text-align: center; }
+.gameover-word-below:hover { color: #e74c3c; }
+.gameover-hint-below { font-size: 13px; color: #999; margin-top: 4px; margin-bottom: 12px; text-align: center; }
+.gameover-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 2px; width: 100%; }
+.gameover-buttons .btn { flex: 1; padding: 12px 20px; font-size: 18px; max-width: 170px; }
+.btn-retry { background: #2ecc71; color: #fff; box-shadow: 0 6px 0 #1a7a44; }
+.btn-retry:hover { transform: scale(1.02); background: #3ddc84; }
+.btn-retry:active { transform: translateY(4px); box-shadow: 0 2px 0 #1a7a44; }
+.btn-stop { background: #e74c3c; color: #fff; box-shadow: 0 6px 0 #a12a2a; }
+.btn-stop:hover { transform: scale(1.02); background: #ff6b6b; }
+.btn-stop:active { transform: translateY(4px); box-shadow: 0 2px 0 #a12a2a; }
+
+/* ====== 12. COMPLETE ====== */
+.complete-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+.complete-overlay.active { display: flex; }
+.complete-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 45px 50px 40px; max-width: 550px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+.complete-title { font-size: 48px; font-weight: 800; color: #2ecc71; letter-spacing: 4px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 12px; }
+.complete-stars { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+.complete-stars img { width: 50px; height: 50px; object-fit: contain; }
+.complete-stars img.gray-star { filter: grayscale(100%); opacity: 0.5; }
+.complete-score { font-size: 28px; font-weight: 700; color: #1a1a2e; margin: 15px 0 25px; }
+.complete-score span { color: #f5c842; }
+.complete-buttons { display: flex; justify-content: center; }
+.complete-buttons .btn { padding: 14px 50px; font-size: 20px; }
+.btn-new { background: #f5c842; color: #1a1a2e; box-shadow: 0 6px 0 #b38a2a; }
+.btn-new:hover { transform: scale(1.02); background: #ffd95e; }
+.btn-new:active { transform: translateY(4px); box-shadow: 0 2px 0 #b38a2a; }
+
+/* ====== 13. ROBOT SVG & AI PANELS ====== */
+.robot-area svg, .game-header-robot svg, .drag-robot svg, .choose-game-robot svg, .spelling-robot-runner svg, .spelling-header-robot svg, .writing-header-robot svg { width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; display: block !important; overflow: visible; pointer-events: auto; }
+
+#aiStatsPanel, #aiProgressPanel, #aiClusterPanel, #aiClassifierPanel { max-height: none; overflow-y: visible; }
+#aiProgressChart { display: block; margin: 12px auto 0 auto; width: 100%; max-width: 520px; background: #fff; border-radius: 12px; }
+#aiProgressPanel { text-align: center; }
+
+/* ====== 14. AI MODAL ====== */
+.ai-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 5000; justify-content: center; align-items: center; padding: 40px; }
+.ai-modal-overlay.active { display: flex; }
+.ai-modal-box { background: #ffffff; border-radius: 30px; padding: 30px 40px; max-width: 900px; width: 100%; max-height: 96vh; overflow-y: auto; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3); position: relative; scrollbar-width: thin; scrollbar-color: #5bc8e8 rgba(0,0,0,0.05); }
+.ai-modal-box::-webkit-scrollbar { width: 10px; }
+.ai-modal-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+.ai-modal-box::-webkit-scrollbar-thumb { background: #5bc8e8; border-radius: 10px; }
+.ai-modal-box::-webkit-scrollbar-thumb:hover { background: #3aa8c8; }
+.ai-modal-close { position: absolute; top: 15px; right: 20px; width: 40px; height: 40px; border: none; background: rgba(0, 0, 0, 0.05); border-radius: 50%; cursor: pointer; font-size: 22px; font-weight: 700; color: #333; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+.ai-modal-close:hover { background: rgba(0, 0, 0, 0.12); transform: scale(1.1); }
+.ai-modal-title { font-size: 22px; font-weight: 800; color: #1a1a2e; margin-bottom: 20px; padding-right: 50px; }
+
+/* ====== 15. RESET CONFIRM MODAL ====== */
+.reset-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 6000; justify-content: center; align-items: center; padding: 20px; }
+.reset-modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+
+.reset-modal-box { background: #ffffff; border-radius: 28px; padding: 35px 30px 25px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35); animation: modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.reset-modal-icon { width: 80px; height: 80px; margin: 0 auto 18px; background: linear-gradient(145deg, #ffe0e0, #ffc4c4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 42px; box-shadow: 0 8px 24px rgba(231, 76, 60, 0.25); }
+.reset-modal-title { font-size: 22px; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; letter-spacing: 0.5px; }
+.reset-modal-text { font-size: 14px; color: #555; margin-bottom: 8px; line-height: 1.5; }
+.reset-modal-list { text-align: left; background: rgba(231, 76, 60, 0.06); border-radius: 14px; padding: 12px 18px; margin: 12px 0 18px; list-style: none; }
+.reset-modal-list li { font-size: 13px; color: #555; padding: 4px 0; padding-left: 22px; position: relative; }
+.reset-modal-list li::before { content: '•'; color: #e74c3c; font-weight: 800; font-size: 18px; position: absolute; left: 6px; top: 2px; }
+.reset-modal-warning { font-size: 18px; color: #e74c3c; font-weight: 800; margin: 15px 0 20px; letter-spacing: 0.5px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.reset-modal-buttons { display: flex; gap: 12px; justify-content: center; }
+.reset-modal-btn { flex: 1; padding: 13px 20px; border: none; border-radius: 50px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; letter-spacing: 1px; text-transform: uppercase; min-width: 140px; }
+.reset-modal-btn.cancel { background: rgba(0, 0, 0, 0.06); color: #1a1a2e; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08); }
+.reset-modal-btn.cancel:hover { background: rgba(0, 0, 0, 0.1); transform: translateY(-1px); }
+.reset-modal-btn.cancel:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08); }
+.reset-modal-btn.confirm { background: #e74c3c; color: #fff; box-shadow: 0 4px 0 #a12a2a; }
+.reset-modal-btn.confirm:hover { background: #ff6b6b; transform: translateY(-1px); }
+.reset-modal-btn.confirm:active { transform: translateY(3px); box-shadow: 0 1px 0 #a12a2a; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ====== 16. МЕДИАЗАПРОСЫ ====== */
+@media (max-width: 820px) {
+  .theme-grid { grid-template-columns: repeat(3, 1fr); }
+  .game-grid { grid-template-columns: repeat(3, 1fr); }
+  .game-card img { width: 130px; height: 130px; }
+  .game-card { min-height: 160px; }
+  .learn-card img { width: 110px; height: 110px; }
+  .theme-card img { width: 110px; height: 110px; }
+  .game-header { min-height: 120px; }
+  .game-header-robot { width: 110px; height: 120px; }
+  .game-header-left .score-block { margin-left: 30px; }
+  .game-header-right .timer-container { margin-right: 30px; }
+  .choose-game-header { min-height: 110px; }
+  .choose-game-robot { width: 100px; height: 110px; }
+  .choose-game-header-left .score-block { margin-left: 30px; }
+  .choose-game-header-right .timer-container { margin-right: 30px; }
+  .drag-header { min-height: 95px; }
+  .drag-robot { width: 85px; height: 95px; }
+  .drag-header-left .score-block { margin-left: 30px; }
+  .spelling-header { min-height: 110px; }
+  .spelling-header-robot { width: 100px; height: 110px; }
+  .spelling-header-left .score-block { margin-left: 30px; }
+  .choose-game-image { flex: 0 0 200px; max-width: 200px; }
+  .spelling-slot { width: 60px; height: 66px; font-size: 30px; }
+  .spelling-track { height: 120px; }
+  .spelling-robot-runner { width: 75px; height: 90px; }
+  .spelling-track-letter { width: 60px; height: 60px; font-size: 28px; }
+  .drag-image-item, .drag-drop-item { max-width: 150px; }
+  .writing-box { padding: 15px 25px 20px; border-radius: 40px; }
+  .writing-header { min-height: 110px; }
+  .writing-header-robot { width: 100px; height: 110px; }
+  .writing-header-left .score-block { margin-left: 30px; }
+}
+
+@media (max-width: 600px) {
+  .menu-overlay { padding: 20px 15px 20px; }
+  .logo { font-size: 28px; letter-spacing: 2px; }
+  .btn { font-size: 16px; }
+  .robot-area { width: 110px; height: 130px; }
+  .theme-grid { grid-template-columns: repeat(2, 1fr); }
+  .game-grid { grid-template-columns: repeat(2, 1fr); }
+  .game-card img { width: 110px; height: 110px; }
+  .game-card { min-height: 140px; }
+  .learn-card img { width: 90px; height: 90px; }
+  .theme-card img { width: 90px; height: 90px; }
+  .game-header { min-height: 105px; }
+  .game-header-robot { width: 90px; height: 100px; }
+  .game-header-left .score-block { margin-left: 15px; }
+  .game-header-right .timer-container { margin-right: 15px; }
+  .game-word { font-size: 36px; }
+  .choose-game-header { min-height: 100px; }
+  .choose-game-robot { width: 85px; height: 95px; }
+  .choose-game-header-left .score-block { margin-left: 15px; }
+  .choose-game-header-right .timer-container { margin-right: 15px; }
+  .drag-header { min-height: 85px; }
+  .drag-robot { width: 75px; height: 85px; }
+  .drag-header-left .score-block { margin-left: 15px; }
+  .spelling-header { min-height: 100px; }
+  .spelling-header-robot { width: 90px; height: 100px; }
+  .spelling-header-left .score-block { margin-left: 15px; }
+  .choose-game-area { flex-direction: column; }
+  .choose-game-image { flex: 0 0 180px; max-width: 180px; }
+  .drag-left-area, .drag-right-area { grid-template-columns: repeat(2, 1fr); }
+  .drag-image-item, .drag-drop-item { max-width: 120px; }
+  .spelling-slot { width: 48px; height: 54px; font-size: 24px; }
+  .spelling-track { height: 100px; }
+  .spelling-robot-runner { width: 60px; height: 70px; }
+  .spelling-track-letter { width: 48px; height: 48px; font-size: 20px; }
+  .writing-box { padding: 15px 20px 20px; border-radius: 40px; }
+  .writing-header { min-height: 100px; }
+  .writing-header-robot { width: 90px; height: 100px; }
+  .writing-header-left .score-block { margin-left: 15px; }
+  .writing-image-wrap img { max-width: 160px; max-height: 160px; }
+  .writing-input { font-size: 18px; padding: 12px 16px; }
+  .writing-submit-btn { padding: 12px 20px; font-size: 14px; }
+  .writing-explanation-box { padding: 25px 25px 25px; border-radius: 30px; }
+  .writing-explanation-icon { min-height: 48px; }
+  .writing-explanation-title { font-size: 24px; }
+  .writing-explanation-text { font-size: 15px; padding: 12px 15px; }
+  .writing-explanation-btn { padding: 12px 30px; font-size: 16px; }
+}
+
+@media (max-width: 420px) {
+  .game-grid { grid-template-columns: repeat(2, 1fr); }
+  .game-card img { width: 90px; height: 90px; }
+  .game-card { min-height: 120px; }
+  .game-word { font-size: 28px; }
+  .game-header-robot { width: 75px; height: 85px; }
+  .game-header-left .score-block { margin-left: 8px; }
+  .game-header-right .timer-container { margin-right: 8px; }
+  .learn-card img { width: 70px; height: 70px; }
+  .theme-card img { width: 70px; height: 70px; }
+  .learn-grid { grid-template-columns: repeat(2, 1fr); }
+  .choose-game-image { flex: 0 0 140px; max-width: 140px; }
+  .drag-image-item, .drag-drop-item { max-width: 100px; }
+  .spelling-slot { width: 38px; height: 42px; font-size: 18px; }
+  .spelling-track { height: 80px; }
+  .spelling-robot-runner { width: 50px; height: 60px; }
+  .spelling-track-letter { width: 38px; height: 38px; font-size: 15px; }
+}
+
+@media (max-height: 700px) {
+  .game-header { min-height: 100px; }
+  .game-header-robot { width: 95px; height: 105px; }
+  .game-card { min-height: 130px; }
+  .game-card img { width: 110px; height: 110px; }
+  .game-word { font-size: 40px; }
+  .choose-game-header { min-height: 90px; }
+  .choose-game-robot { width: 90px; height: 100px; }
+  .drag-header { min-height: 80px; }
+  .drag-robot { width: 80px; height: 90px; }
+  .drag-image-item, .drag-drop-item { max-width: 150px; }
+  .spelling-header { min-height: 95px; }
+  .spelling-header-robot { width: 95px; height: 105px; }
+  .spelling-slot { width: 56px; height: 60px; font-size: 28px; }
+  .spelling-track { height: 110px; }
+  .spelling-robot-runner { width: 70px; height: 85px; }
+  .spelling-track-letter { width: 55px; height: 55px; font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<!-- МЕНЮ -->
+<div class="menu-overlay" id="mainMenu">
+  <div class="robot-area"><div id="menuRobot"></div></div>
+  <div class="logo">WORD TRAINER</div>
+  <div class="logo-sub">Interactive Vocabulary Trainer</div>
+  <div class="buttons">
+    <button class="btn btn-start" id="startBtn">START</button>
+    <button class="btn btn-choose" id="chooseBtn">CHOOSE</button>
+    <button class="btn btn-reset" id="resetDataBtn">️ RESET DATA</button>
+  </div>
+  <div class="footer-info">
+    <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+      <img id="themeIcon" src="картинки/themes/animals.png" alt="Theme" style="width: 100px; height: 100px; object-fit: contain; border-radius: 6px;">
+      <span style="font-size: 18px;">Theme: <span id="themeName" style="font-size: 18px; font-weight: 700;">Animals</span></span>
+    </div>
+  </div>
+  <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.08);">
+    <div style="font-size: 12px; font-weight: 700; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; text-align: center;">
+      AI Analytics
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <button class="btn btn-choose" id="aiStatsBtn" style="font-size: 12px; padding: 10px 8px; letter-spacing: 1px;">Statistics</button>
+      <button class="btn btn-choose" id="aiProgressBtn" style="font-size: 12px; padding: 10px 8px; letter-spacing: 1px;">Progress</button>
+      <button class="btn btn-choose" id="aiClusterBtn" style="font-size: 12px; padding: 10px 8px; letter-spacing: 1px;">Clusters</button>
+      <button class="btn btn-choose" id="aiClassifierBtn" style="font-size: 12px; padding: 10px 8px; letter-spacing: 1px;">Classifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- ВЫБОР ТЕМ -->
+<div class="choose-overlay" id="chooseOverlay">
+  <div class="choose-box">
+    <div class="choose-back-wrap"><button class="btn-back-game" id="chooseBackBtn" title="Back to menu"><img src="картинки/ui/back_icon.avif" alt="Back"></button></div>
+    <h2>Select Content</h2>
+    <div class="nav-row">
+      <button class="nav-btn" id="prevPage" title="Back"><img src="картинки/ui/arrow_left.png" alt="Back"></button>
+      <span class="page-indicator" id="pageIndicator">1 / 4</span>
+      <button class="nav-btn" id="nextPage" title="Next"><img src="картинки/ui/arrow_right.png" alt="Next"></button>
+    </div>
+    <div class="theme-grid" id="themeGrid"></div>
+  </div>
+</div>
+
+<!-- ЭКРАН ИЗУЧЕНИЯ -->
+<div class="learn-overlay" id="learnOverlay">
+  <div class="learn-box">
+    <div class="learn-header">
+      <div class="learn-header-left"><button class="btn-back-game" id="learnBackBtn" title="Back to menu"><img src="картинки/ui/back_icon.avif" alt="Back"></button></div>
+      <div class="learn-header-center"><div class="learn-title" id="learnTitle">Animals</div><div class="learn-sub">Click picture to hear word, click translate icon for translation</div></div>
+      <div class="learn-header-right"><button class="btn-sound" id="learnSoundBtn" title="Toggle sound"><img src="картинки/ui/sound_on.png" alt="Sound" id="learnSoundIcon"></button></div>
+    </div>
+    <div class="learn-grid-wrap">
+      <div class="learn-nav">
+        <button class="nav-btn" id="learnPrev"><img src="картинки/ui/arrow_left.png" alt="Back"></button>
+        <span class="learn-page" id="learnPageDisplay">1 / 2</span>
+        <button class="nav-btn" id="learnNext"><img src="картинки/ui/arrow_right.png" alt="Next"></button>
+      </div>
+      <div class="learn-grid" id="learnGrid"></div>
+      <div class="learn-actions">
+        <button class="btn btn-learn-play" id="learnPlayBtn">PLAY</button>
+        <button class="btn btn-learn-choose" id="learnChooseBtn">CHOOSE</button>
+        <button class="btn btn-learn-write" id="learnWriteBtn">WRITE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ИГРА 1: CLICK -->
+<div class="game-overlay" id="gameOverlay">
+  <div class="game-box">
+    <div class="game-header">
+      <div class="game-header-left">
+        <button class="btn-back-game" id="gameBackBtn" title="Back to menu"><img src="картинки/ui/back_icon.avif" alt="Back"></button>
+        <div class="score-block"><div class="score-label">SCORE</div><div class="score-value" id="gameScore">0</div></div>
+      </div>
+      <div class="game-header-robot" id="gameRobot"></div>
+      <div class="game-header-right">
+        <div class="timer-container"><svg class="timer-svg" viewBox="0 0 56 56"><circle class="timer-bg" cx="28" cy="28" r="25"/><circle class="timer-progress" id="timerProgress" cx="28" cy="28" r="25"/><text class="timer-text" id="timerText" x="28" y="28" text-anchor="middle" dominant-baseline="central">5</text></svg></div>
+        <button class="btn-sound" id="gameSoundBtn" title="Toggle sound"><img src="картинки/ui/sound_on.png" alt="Sound" id="gameSoundIcon"></button>
+      </div>
+    </div>
+    <div class="game-word" id="gameWord">—</div>
+    <div class="game-hint" id="gameHint">Choose the correct picture</div>
+    <div class="game-grid" id="gameGrid"></div>
+    <div class="game-progress"><div class="game-progress-bar" id="gameProgress"></div></div>
+    <div class="game-progress-text" id="gameProgressText">1 / 40</div>
+  </div>
+</div>
+
+<!-- ИГРА 2: DRAG -->
+<div class="drag-overlay" id="dragOverlay">
+  <div class="drag-box">
+    <div class="drag-header">
+      <div class="drag-header-left">
+        <button class="btn-back-game" id="dragBackBtn" title="Back to menu"><img src="картинки/ui/back_icon.avif" alt="Back"></button>
+        <div class="score-block"><div class="score-label">SCORE</div><div class="score-value" id="dragScore">0</div></div>
+      </div>
+      <div class="drag-robot" id="dragRobot"></div>
+      <div class="drag-header-right">
+        <div class="timer-container"><svg class="timer-svg" viewBox="0 0 56 56"><circle class="timer-bg" cx="28" cy="28" r="25"/><circle class="timer-progress" id="dragTimerProgress" cx="28" cy="28" r="25"/><text class="timer-text" id="dragTimerText" x="28" y="28" text-anchor="middle" dominant-baseline="central">10</text></svg></div>
+        <button class="btn-sound" id="dragSoundBtn" title="Toggle sound"><img src="картинки/ui/sound_on.png" alt="Sound" id="dragSoundIcon"></button>
+      </div>
+    </div>
+    <div class="drag-hint-text" id="dragHintText"><span class="hint-icon icon-drag"></span><b>Drag</b> the picture to the correct word</div>
+    <div class="drag-grid-container" id="dragGridContainer">
+      <div class="drag-left-area" id="dragLeftArea"></div>
+      <div class="drag-right-area" id="dragRightArea"></div>
+    </div>
+    <div class="drag-progress"><div class="drag-progress-bar" id="dragProgress"></div></div>
+    <div class="drag-progress-text" id="dragProgressText">11 / 40</div>
+  </div>
+</div>
+
+<!-- ИГРА 3: CHOOSE -->
+<div class="choose-overlay-game" id="chooseGameOverlay">
+  <div class="choose-game-box">
+    <div class="choose-game-header">
+      <div class="choose-game-header-left">
+        <button class="btn-back-game" id="chooseGameBackBtn" title="Back to menu"><img src="картинки/ui/back_icon.avif" alt="Back"></button>
+        <div class="score-block"><div class="score-label">SCORE</div><div class="score-value" id="chooseGameScore">0</div></div>
+      </div>
+      <div class="choose-game-robot" id="chooseRobot"></div>
+      <div class="choose-game-header-right">
+        <div class="timer-container"><svg class="timer-svg" viewBox="0 0 56 56"><circle class="timer-bg" cx="28" cy="28" r="25"/><circle class="timer-progress" id="chooseTimerProgress" cx="28" cy="28" r="25"/><text class="timer-text" id="chooseTimerText" x="28" y="28" text-anchor="middle" dominant-baseline="central">5</text></svg></div>
+        <button class="btn-sound" id="chooseGameSoundBtn" title="Toggle sound"><img src="картинки/ui/sound_on.png" alt="Sound" id="chooseGameSoundIcon"></button>
+      </div>
+    </div>
+    <div class="choose-game-area">
+      <div class="choose-game-image" id="chooseGameImage"><img src="" alt="Word" id="chooseGameImg"></div>
+      <div class="choose-game-options" id="chooseGameOptions"></div>
+    </div>
+    <div class="choose-game-progress"><div class="choose-game-progress-bar" id="chooseGameProgress"></div></div>
+    <div class="choose-game-progress-text" id="chooseGameProgressText">21 / 40</div>
+  </div>
+</div>
+
+<!-- ИГРА 4: SPELLING -->
+<div class="spelling-overlay" id="spellingOverlay">
+  <div class="spelling-box">
+    <div class="spelling-header">
+      <div class="spelling-header-left">
+        <button class="btn-back-game" id="spellingBackBtn" title="Back to menu"><img src="картинки/ui/back_icon.avif" alt="Back"></button>
+        <div class="score-block"><div class="score-label">SCORE</div><div class="score-value" id="spellingScore">0</div></div>
+      </div>
+      <div class="spelling-header-robot" id="spellingRobotTop" style="display:none;"></div>
+      <div class="spelling-header-right">
+        <button class="btn-sound" id="spellingSoundBtn" title="Toggle sound"><img src="картинки/ui/sound_on.png" alt="Sound" id="spellingSoundIcon"></button>
+      </div>
+    </div>
+    <div class="spelling-word-show" id="spellingWordShow">—</div>
+    <div class="spelling-track" id="spellingTrack">
+      <div class="spelling-robot-runner" id="spellingRobotRunner"></div>
+      <div class="spelling-track-letters" id="spellingTrackLetters"></div>
+    </div>
+    <div class="spelling-slots" id="spellingSlots"></div>
+    <div class="spelling-progress"><div class="spelling-progress-bar" id="spellingProgress"></div></div>
+    <div class="spelling-progress-text" id="spellingProgressText">31 / 40</div>
+  </div>
+</div>
+
+<!-- ИГРА 5: WRITING -->
+<div class="writing-overlay" id="writingOverlay">
+  <div class="writing-box">
+    <div class="writing-header">
+      <div class="writing-header-left">
+        <button class="btn-back-game" id="writingBackBtn" title="Back to menu"><img src="картинки/ui/back_icon.avif" alt="Back"></button>
+        <div class="score-block"><div class="score-label">SCORE</div><div class="score-value" id="writingScore">0</div></div>
+      </div>
+      <div class="writing-header-robot" id="writingRobot"></div>
+      <div class="writing-header-right">
+        <button class="btn-sound" id="writingSoundBtn" title="Toggle sound"><img src="картинки/ui/sound_on.png" alt="Sound" id="writingSoundIcon"></button>
+      </div>
+    </div>
+    <div class="writing-image-wrap">
+      <img src="" alt="Word" id="writingImage">
+    </div>
+    <div class="writing-hint-text" id="writingHintText"><span class="hint-icon icon-write"></span><b>Type</b> the word in English</div>
+    <div class="writing-input-wrap">
+      <input type="text" id="writingInput" class="writing-input" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <button class="btn writing-submit-btn" id="writingSubmitBtn">CHECK</button>
+    </div>
+    <div class="writing-feedback" id="writingFeedback"></div>
+    <div class="writing-progress"><div class="writing-progress-bar" id="writingProgress"></div></div>
+    <div class="writing-progress-text" id="writingProgressText">1 / 10</div>
+  </div>
+</div>
+
+<!-- ПОЯСНЕНИЕ В ИГРЕ WRITING -->
+<div class="writing-explanation-overlay" id="writingExplanationOverlay">
+  <div class="writing-explanation-box">
+    <div class="writing-explanation-icon" id="writingExplanationIcon"><span class="hint-icon icon-check xl"></span></div>
+    <div class="writing-explanation-title" id="writingExplanationTitle">Perfect!</div>
+    <div class="writing-explanation-text" id="writingExplanationText"></div>
+    <button class="writing-explanation-btn" id="writingExplanationNextBtn">Next →</button>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="gameover-overlay" id="gameoverOverlay">
+  <div class="gameover-box">
+    <div class="gameover-header">
+      <span class="gameover-title"><span class="hint-icon icon-cross lg"></span>Game Over</span>
+      <div class="gameover-sound"><button class="btn-sound" id="gameoverSoundBtn" title="Toggle sound"><img src="картинки/ui/sound_on.png" alt="Sound" id="gameoverSoundIcon"></button></div>
+    </div>
+    <div class="gameover-subtitle">You made a mistake!</div>
+    <div class="gameover-content-row">
+      <div class="gameover-image-wrapper" id="gameoverImageWrapper">
+        <img src="" alt="Correct word" id="gameoverImg">
+        <div class="gameover-translate-btn" id="gameoverTranslateBtn" title="Перевод">
+          <img src="картинки/ui/translate.png" alt="Translate">
+        </div>
+      </div>
+      <button class="gameover-arrow" id="gameoverArrowBtn" title="Go to Learn"><img src="картинки/ui/arrow_right.png" alt="Learn"></button>
+    </div>
+    <div class="gameover-word-below" id="gameoverWordBelow">—</div>
+    <div class="gameover-hint-below"><span class="hint-icon icon-click"></span><b>Click</b> the word to hear it</div>
+    <div class="gameover-buttons">
+      <button class="btn btn-retry" id="gameoverRetryBtn">RETRY</button>
+      <button class="btn btn-stop" id="gameoverStopBtn">STOP</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETE -->
+<div class="complete-overlay" id="completeOverlay">
+  <div class="complete-box">
+    <div class="complete-title"><span class="hint-icon icon-star xl" style="width:42px; height:42px;"></span>COMPLETE</div>
+    <div class="complete-stars" id="completeStars"></div>
+    <div class="complete-score">Score: <span id="completeScore">0</span></div>
+    <div class="complete-buttons"><button class="btn btn-new" id="completeNewBtn">NEXT</button></div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО СБРОСА -->
+<div class="reset-modal-overlay" id="resetModalOverlay">
+  <div class="reset-modal-box">
+    <div class="reset-modal-icon">🗑️</div>
+    <div class="reset-modal-title">Reset ALL Data?</div>
+    <div class="reset-modal-text">This will permanently delete:</div>
+    <ul class="reset-modal-list">
+      <li>Word weights</li>
+      <li>Game history</li>
+      <li>Clusters</li>
+      <li>Classifier</li>
+      <li>Progress predictions</li>
+    </ul>
+    <div class="reset-modal-warning">
+      <img src="картинки/ui/icon_warning.png" alt="Warning" style="width: 28px; height: 28px;">
+      This cannot be undone!
+    </div>
+    <div class="reset-modal-buttons">
+      <button class="reset-modal-btn cancel" id="resetCancelBtn">Cancel</button>
+      <button class="reset-modal-btn confirm" id="resetConfirmBtn">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ИИ-АНАЛИТИКИ -->
+<div class="ai-modal-overlay" id="aiModalOverlay">
+  <div class="ai-modal-box">
+    <button class="ai-modal-close" id="aiModalClose" title="Close">×</button>
+    <div class="ai-modal-title" id="aiModalTitle">AI Analytics</div>
+    <div id="aiModalContent">
+      <div id="aiProgressPanel" style="display:none; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 20px; text-align: left; font-size: 13px;">
+        <div id="aiProgressContent" style="color: #666;">Play at least 3 games to see prediction!</div>
+        <canvas id="aiProgressChart" width="600" height="260"></canvas>
+      </div>
+      <div id="aiStatsPanel" style="display:none; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 20px; text-align: left; font-size: 13px;">
+        <div id="aiStatsContent" style="color: #666;">No data yet. Play a game first!</div>
+      </div>
+      <div id="aiClusterPanel" style="display:none; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 20px; text-align: left; font-size: 13px;">
+        <div id="aiClusterContent" style="color: #666;">Play more games to see clusters!</div>
+      </div>
+      <div id="aiClassifierPanel" style="display:none; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 20px; text-align: left; font-size: 13px;">
+        <div id="aiClassifierContent" style="color: #666;">Play more games to train the classifier!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ПОДКЛЮЧЕНИЕ СКТИПТОВ ИИ И РОБОТА -->
+<script src="ai-adaptive.js"></script>
+<script src="ai-fuzzy.js"></script>
+<script src="ai-classifier.js"></script>
+<script src="ai-cluster.js"></script>
+<script src="robot.js"></script>
+<script src="ai-progress.js"></script>
+
+<script>
+// ==================== THEMES LIST ====================
+const THEMES_LIST = [
+  { name: 'Colors', img: 'colors.png' },
+  { name: 'Numbers', img: 'numbers.jpeg' },
+  { name: 'Family', img: 'family.jpg' },
+  { name: 'Body', img: 'body.png' },
+  { name: 'Toys', img: 'toys.png' },
+  { name: 'Animals', img: 'animals.png' },
+  { name: 'Food', img: 'food.png' },
+  { name: 'Clothes', img: 'clothes.png' },
+  { name: 'Weather', img: 'weather.png' },
+  { name: 'Home', img: 'home.jpeg' },
+  { name: 'Kitchen', img: 'kitchen.jpg' },
+  { name: 'Bathroom', img: 'bathroom.jpg' },
+  { name: 'Stationery', img: 'stationery.jpg' },
+  { name: 'Garden', img: 'garden.jpg' },
+  { name: 'Nature', img: 'nature.jpg' },
+  { name: 'Sports', img: 'sports.jpeg' },
+  { name: 'Music', img: 'music.jpeg' },
+  { name: 'Transport', img: 'transport.jpeg' },
+  { name: 'Things', img: 'things.jpeg' },
+  { name: 'Places', img: 'places.jpeg' },
+  { name: 'Jobs', img: 'jobs.jpg' },
+  { name: 'Hospital', img: 'hospital.jpeg' },
+  { name: 'Space', img: 'space.jpg' },
+  { name: 'Countries', img: 'countries.png' },
+  { name: 'Subjects', img: 'subjects.jpeg' },
+  { name: 'Technology', img: 'technology.jpeg' },
+  { name: 'Computer', img: 'computer.jpg' },
+  { name: 'Personal', img: 'personal.jpeg' }
+];
+
+// ==================== WORDS BY THEME ====================
+const WORDS_BY_THEME = {
+Animals: [
+{ word: 'ant', img: 'ant.png' }, { word: 'bat', img: 'bat.png' }, { word: 'bear', img: 'bear.png' },
+{ word: 'bee', img: 'bee.png' }, { word: 'bird', img: 'bird.png' }, { word: 'buffalo', img: 'buffalo.png' },
+{ word: 'butterfly', img: 'butterfly.png' }, { word: 'cat', img: 'cat.png' }, { word: 'chicken', img: 'chicken.png' },
+{ word: 'cow', img: 'cow.png' }, { word: 'crocodile', img: 'crocodile.png' }, { word: 'crow', img: 'crow.png' },
+{ word: 'deer', img: 'deer.png' }, { word: 'dog', img: 'dog.png' }, { word: 'dolphin', img: 'dolphin.png' },
+{ word: 'donkey', img: 'donkey.png' }, { word: 'duck', img: 'duck.png' }, { word: 'eagle', img: 'eagle.png' },
+{ word: 'elephant', img: 'elephant.png' }, { word: 'elk', img: 'elk.png' }, { word: 'fly', img: 'fly.png' },
+{ word: 'fox', img: 'fox.png' }, { word: 'frog', img: 'frog.png' }, { word: 'giraffe', img: 'giraffe.png' },
+{ word: 'goat', img: 'goat.png' }, { word: 'goose', img: 'goose.png' }, { word: 'guinea pig', img: 'guinea pig.png' },
+{ word: 'hamster', img: 'hamster.png' }, { word: 'hedgehog', img: 'hedgehog.png' }, { word: 'hippo', img: 'hippo.png' },
+{ word: 'horse', img: 'horse.png' }, { word: 'kangaroo', img: 'kangaroo.png' }, { word: 'koala', img: 'koala.png' },
+{ word: 'ladybug', img: 'ladybug.png' }, { word: 'leopard', img: 'leopard.png' }, { word: 'lion', img: 'lion.png' },
+{ word: 'lizard', img: 'lizard.png' }, { word: 'mole', img: 'mole.jpg' }, { word: 'monkey', img: 'monkey.png' },
+{ word: 'owl', img: 'owl.png' }, { word: 'panda', img: 'panda.png' }, { word: 'parrot', img: 'parrot.png' },
+{ word: 'penguin', img: 'penguin.png' }, { word: 'pig', img: 'pig.png' }, { word: 'rabbit', img: 'rabbit.png' },
+{ word: 'raccoon', img: 'raccoon.png' }, { word: 'rhino', img: 'rhino.png' }, { word: 'seal', img: 'seal.png' },
+{ word: 'shark', img: 'shark.png' }, { word: 'sheep', img: 'sheep.png' }, { word: 'snail', img: 'snail.png' },
+{ word: 'snake', img: 'snake.png' }, { word: 'sparrow', img: 'sparrow.png' }, { word: 'spider', img: 'spider.png' },
+{ word: 'squirrel', img: 'squirrel.png' }, { word: 'tiger', img: 'tiger.png' }, { word: 'turkey', img: 'turkey.png' },
+{ word: 'turtle', img: 'turtle.png' }, { word: 'whale', img: 'whale.png' }, { word: 'worm', img: 'worm.jpg' },
+{ word: 'zebra', img: 'zebra.png' }
+],
+Food: [
+{ word: 'apple', img: 'apple.png' }, { word: 'apricot', img: 'apricot.png' }, { word: 'avocado', img: 'avocado.png' },
+{ word: 'bacon', img: 'bacon.png' }, { word: 'banana', img: 'banana.png' }, { word: 'bean', img: 'bean.png' },
+{ word: 'bread', img: 'bread.png' }, { word: 'broccoli', img: 'broccoli.png' }, { word: 'burger', img: 'burger.png' },
+{ word: 'butter', img: 'butter.png' }, { word: 'cabbage', img: 'cabbage.png' }, { word: 'cake', img: 'cake.png' },
+{ word: 'candy', img: 'candy.png' }, { word: 'carrot', img: 'carrot.png' }, { word: 'cauliflower', img: 'cauliflower.png' },
+{ word: 'celery', img: 'celery.png' }, { word: 'cereal', img: 'cereal.png' }, { word: 'cheese', img: 'cheese.png' },
+{ word: 'cherry', img: 'cherry.png' }, { word: 'chicken', img: 'chicken.png' }, { word: 'chocolate', img: 'chocolate.png' },
+{ word: 'coconut', img: 'coconut.png' }, { word: 'coffee', img: 'coffee.png' }, { word: 'cookie', img: 'cookie.png' },
+{ word: 'corn', img: 'corn.png' }, { word: 'cucumber', img: 'cucumber.png' }, { word: 'date', img: 'date.png' },
+{ word: 'donut', img: 'donut.png' }, { word: 'egg', img: 'egg.png' }, { word: 'eggplant', img: 'eggplant.png' },
+{ word: 'fig', img: 'fig.png' }, { word: 'fish', img: 'fish.png' }, { word: 'fries', img: 'fries.png' },
+{ word: 'garlic', img: 'garlic.png' }, { word: 'grape', img: 'grape.png' }, { word: 'ham', img: 'ham.png' },
+{ word: 'honey', img: 'honey.png' }, { word: 'ice cream', img: 'ice cream.png' }, { word: 'jam', img: 'jam.png' },
+{ word: 'juice', img: 'juice.png' }, { word: 'kiwi', img: 'kiwi.png' }, { word: 'lemon', img: 'lemon.png' },
+{ word: 'lime', img: 'lime.png' }, { word: 'mango', img: 'mango.png' }, { word: 'meat', img: 'meat.png' },
+{ word: 'milk', img: 'milk.png' }, { word: 'milkshake', img: 'milkshake.png' }, { word: 'muffin', img: 'muffin.png' },
+{ word: 'mushroom', img: 'mushroom.png' }, { word: 'nectarine', img: 'nectarine.png' }, { word: 'noodles', img: 'noodles.png' },
+{ word: 'oil', img: 'oil.png' }, { word: 'onion', img: 'onion.png' },
+{ word: 'pancake', img: 'pancake.png' }, { word: 'pasta', img: 'pasta.png' }, { word: 'pea', img: 'pea.png' },
+{ word: 'peach', img: 'peach.png' }, { word: 'pear', img: 'pear.png' }, { word: 'pepper', img: 'pepper.png' },
+{ word: 'pie', img: 'pie.png' }, { word: 'pineapple', img: 'pineapple.png' }, { word: 'pizza', img: 'pizza.png' },
+{ word: 'plum', img: 'plum.png' }, { word: 'potato', img: 'potato.png' }, { word: 'pumpkin', img: 'pumpkin.png' },
+{ word: 'radish', img: 'radish.png' }, { word: 'rice', img: 'rice.png' }, { word: 'salad', img: 'salad.png' },
+{ word: 'salt', img: 'salt.png' }, { word: 'sandwich', img: 'sandwich.png' }, { word: 'sausage', img: 'sausage.png' },
+{ word: 'soda', img: 'soda.png' }, { word: 'soup', img: 'soup.png' }, { word: 'spinach', img: 'spinach.png' },
+{ word: 'steak', img: 'steak.png' }, { word: 'stew', img: 'stew.png' }, { word: 'strawberry', img: 'strawberry.png' },
+{ word: 'sugar', img: 'sugar.png' }, { word: 'tea', img: 'tea.png' }, { word: 'toast', img: 'toast.png' },
+{ word: 'tomato', img: 'tomato.png' }, { word: 'waffle', img: 'waffle.png' }, { word: 'water', img: 'water.png' },
+{ word: 'watermelon', img: 'watermelon.png' }, { word: 'yogurt', img: 'yogurt.png' }, { word: 'zucchini', img: 'zucchini.png' }
+],
+Family: [
+{ word: 'baby', img: 'baby.png' }, { word: 'brother', img: 'brother.png' }, { word: 'father', img: 'father.png' },
+{ word: 'mother', img: 'mother.png' }, { word: 'sister', img: 'sister.png' }, { word: 'grandfather', img: 'grandfather.png' },
+{ word: 'grandmother', img: 'grandmother.png' }, { word: 'twins', img: 'twins.png' }, { word: 'children', img: 'children.png' },
+{ word: 'parents', img: 'parents.png' }
+],
+Toys: [
+{ word: 'ball', img: 'ball.png' }, { word: 'plush toy', img: 'plush toy.png' }, { word: 'blocks', img: 'blocks.png' },
+{ word: 'boat', img: 'boat.png' }, { word: 'car', img: 'car.png' }, { word: 'doll', img: 'doll.png' },
+{ word: 'drum', img: 'drum.png' }, { word: 'kite', img: 'kite.png' }, { word: 'plane', img: 'plane.png' },
+{ word: 'puzzle', img: 'puzzle.png' }, { word: 'robot', img: 'robot.png' }, { word: 'train', img: 'train.png' },
+{ word: 'castle', img: 'castle.png' }, { word: 'tent', img: 'tent.png' }, { word: 'water gun', img: 'water gun.png' }
+],
+Sports: [
+{ word: 'archery', img: 'archery.png' }, { word: 'badminton', img: 'badminton.png' }, { word: 'baseball', img: 'baseball.png' },
+{ word: 'basketball', img: 'basketball.png' }, { word: 'boxing', img: 'boxing.png' }, { word: 'cycling', img: 'cycling.png' },
+{ word: 'fencing', img: 'fencing.png' }, { word: 'football', img: 'football.png' }, { word: 'golf', img: 'golf.png' },
+{ word: 'gymnastics', img: 'gymnastics.png' }, { word: 'hockey', img: 'hockey.png' }, { word: 'karate', img: 'karate.png' },
+{ word: 'rugby', img: 'rugby.png' }, { word: 'running', img: 'running.png' }, { word: 'skating', img: 'skating.png' },
+{ word: 'skiing', img: 'skiing.png' }, { word: 'surfing', img: 'surfing.jpg' }, { word: 'swimming', img: 'swimming.png' },
+{ word: 'table tennis', img: 'table tennis.png' }, { word: 'tennis', img: 'tennis.png' }, { word: 'volleyball', img: 'volleyball.png' },
+{ word: 'yoga', img: 'yoga.png' }
+],
+Clothes: [
+{ word: 'belt', img: 'belt.png' }, { word: 'blouse', img: 'blouse.png' }, { word: 'boots', img: 'boots.png' },
+{ word: 'cap', img: 'cap.png' }, { word: 'coat', img: 'coat.png' }, { word: 'dress', img: 'dress.png' },
+{ word: 'gloves', img: 'gloves.png' }, { word: 'hat', img: 'hat.png' }, { word: 'hoodie', img: 'hoodie.png' },
+{ word: 'jacket', img: 'jacket.png' }, { word: 'jeans', img: 'jeans.png' }, { word: 'leggings', img: 'leggings.png' },
+{ word: 'pants', img: 'pants.png' }, { word: 'pyjamas', img: 'pyjamas.png' }, { word: 'raincoat', img: 'raincoat.png' },
+{ word: 'sandals', img: 'sandals.png' }, { word: 'scarf', img: 'scarf.png' }, { word: 'shirt', img: 'shirt.png' },
+{ word: 'shoes', img: 'shoes.png' }, { word: 'shorts', img: 'shorts.png' }, { word: 'skirt', img: 'skirt.png' },
+{ word: 'socks', img: 'socks.png' }, { word: 'sweater', img: 'sweater.png' }, { word: 'tie', img: 'tie.png' }
+],
+Body: [
+{ word: 'arm', img: 'arm.png' }, { word: 'back', img: 'back.png' }, { word: 'chin', img: 'chin.png' },
+{ word: 'ear', img: 'ear.png' }, { word: 'elbow', img: 'elbow.png' }, { word: 'eye', img: 'eye.png' },
+{ word: 'eyebrows', img: 'eyebrows.png' }, { word: 'eyelash', img: 'eyelash.png' }, { word: 'face', img: 'face.png' },
+{ word: 'finger', img: 'finger.png' }, { word: 'foot', img: 'foot.png' }, { word: 'forehead', img: 'forehead.png' },
+{ word: 'hair', img: 'hair.png' }, { word: 'hand', img: 'hand.png' }, { word: 'head', img: 'head.png' },
+{ word: 'leg', img: 'leg.png' }, { word: 'lips', img: 'lips.png' }, { word: 'mouth', img: 'mouth.png' },
+{ word: 'neck', img: 'neck.png' }, { word: 'nose', img: 'nose.png' }, { word: 'shoulder', img: 'shoulder.png' },
+{ word: 'stomach', img: 'stomach.png' }, { word: 'thumb', img: 'thumb.png' }, { word: 'toe', img: 'toe.png' },
+{ word: 'tongue', img: 'tongue.png' }
+],
+Weather: [
+{ word: 'autumn', img: 'autumn.jpg' }, { word: 'cloud', img: 'cloud.png' }, { word: 'cold', img: 'cold.png' },
+{ word: 'drought', img: 'drought.jpg' }, { word: 'flood', img: 'flood.jpg' }, { word: 'fog', img: 'fog.png' },
+{ word: 'hail', img: 'hail.png' }, { word: 'hot', img: 'hot.png' }, { word: 'lightning', img: 'lightning.png' },
+{ word: 'mist', img: 'mist.png' }, { word: 'rain', img: 'rain.png' }, { word: 'rainbow', img: 'rainbow.png' },
+{ word: 'season', img: 'season.jpg' }, { word: 'snow', img: 'snow.png' }, { word: 'spring', img: 'spring.jpg' },
+{ word: 'storm', img: 'storm.png' }, { word: 'summer', img: 'summer.jpg' }, { word: 'sun', img: 'sun.png' },
+{ word: 'temperature', img: 'temperature.png' }, { word: 'tornado', img: 'tornado.png' }, { word: 'wind', img: 'wind.png' },
+{ word: 'winter', img: 'winter.jpg' }
+],
+Home: [
+{ word: 'armchair', img: 'armchair.png' }, { word: 'balcony', img: 'balcony.png' }, { word: 'basement', img: 'basement.png' },
+{ word: 'bathroom', img: 'bathroom.jpg' }, { word: 'bed', img: 'bed.png' }, { word: 'carpet', img: 'carpet.png' },
+{ word: 'chair', img: 'chair.png' }, { word: 'chimney', img: 'chimney.png' }, { word: 'closet', img: 'closet.png' },
+{ word: 'curtain', img: 'curtain.jpg' }, { word: 'door', img: 'door.png' }, { word: 'fence', img: 'fence.png' },
+{ word: 'floor', img: 'floor.png' }, { word: 'garage', img: 'garage.png' }, { word: 'garden', img: 'garden.jpg' },
+{ word: 'gate', img: 'gate.png' }, { word: 'hallway', img: 'hallway.jpg' }, { word: 'kitchen', img: 'kitchen.jpg' },
+{ word: 'room', img: 'room.jpg' }, { word: 'roof', img: 'roof.png' }, { word: 'sofa', img: 'sofa.png' },
+{ word: 'stairs', img: 'stairs.png' }, { word: 'table', img: 'table.png' }, { word: 'wall', img: 'wall.png' },
+{ word: 'window', img: 'window.png' }
+],
+Places: [
+{ word: 'airport', img: 'airport.jpg' }, { word: 'bakery', img: 'bakery.jpg' }, { word: 'bank', img: 'bank.jpg' },
+{ word: 'bar', img: 'bar.png' }, { word: 'bookstore', img: 'bookstore.jpg' }, { word: 'bus stop', img: 'bus stop.jpg' },
+{ word: 'cafe', img: 'cafe.png' }, { word: 'castle', img: 'castle.jpg' }, { word: 'cemetery', img: 'cemetery.jpg' },
+{ word: 'church', img: 'church.jpg' }, { word: 'cinema', img: 'cinema.jpg' }, { word: 'circus', img: 'circus.png' },
+{ word: 'clinic', img: 'clinic.png' }, { word: 'college', img: 'college.jpg' }, { word: 'courthouse', img: 'courthouse.png' },
+{ word: 'factory', img: 'factory.png' }, { word: 'farm', img: 'farm.jpg' }, { word: 'fire station', img: 'fire station.jpg' },
+{ word: 'gym', img: 'gym.jpg' }, { word: 'hospital', img: 'hospital.jpg' }, { word: 'hotel', img: 'hotel.png' },
+{ word: 'house', img: 'house.png' }, { word: 'library', img: 'library.jpg' }, { word: 'lighthouse', img: 'lighthouse.jpg' },
+{ word: 'market', img: 'market.jpg' }, { word: 'mosque', img: 'mosque.png' }, { word: 'museum', img: 'museum.jpg' },
+{ word: 'office', img: 'office.jpg' }, { word: 'palace', img: 'palace.jpg' }, { word: 'park', img: 'park.jpg' },
+{ word: 'playground', img: 'playground.jpg' }, { word: 'police station', img: 'police station.jpg' },
+{ word: 'port', img: 'port.jpg' }, { word: 'post office', img: 'post office.jpg' }, { word: 'prison', img: 'prison.jpg' },
+{ word: 'restaurant', img: 'restaurant.jpg' }, { word: 'school', img: 'school.jpg' }, { word: 'shop', img: 'shop.jpg' },
+{ word: 'skyscraper', img: 'skyscraper.png' }, { word: 'square', img: 'square.jpg' }, { word: 'stadium', img: 'stadium.jpg' },
+{ word: 'station', img: 'station.jpg' }, { word: 'temple', img: 'temple.jpg' }, { word: 'theater', img: 'theater.jpg' },
+{ word: 'tower', img: 'tower.png' }, { word: 'train station', img: 'train station .jpg' }, { word: 'university', img: 'university.jpg' },
+{ word: 'zoo', img: 'zoo.jpg' }
+],
+Kitchen: [
+{ word: 'blender', img: 'blender.png' }, { word: 'bowl', img: 'bowl.png' }, { word: 'chopping board', img: 'chopping board.png' },
+{ word: 'colander', img: 'colander.png' }, { word: 'cooker', img: 'cooker.png' }, { word: 'corkscrew', img: 'corkscrew.png' },
+{ word: 'cup', img: 'cup.png' }, { word: 'dishwasher', img: 'dishwasher.png' }, { word: 'fork', img: 'fork.png' },
+{ word: 'freezer', img: 'freezer.png' }, { word: 'fridge', img: 'fridge.png' }, { word: 'grater', img: 'grater.png' },
+{ word: 'kettle', img: 'kettle.png' }, { word: 'knife', img: 'knife.png' }, { word: 'ladle', img: 'ladle.png' },
+{ word: 'microwave', img: 'microwave.png' }, { word: 'mixer', img: 'mixer.png' }, { word: 'mug', img: 'mug.png' },
+{ word: 'oven', img: 'oven.png' }, { word: 'pan', img: 'pan.png' }, { word: 'peeler', img: 'peeler.png' },
+{ word: 'plate', img: 'plate.png' }, { word: 'pot', img: 'pot.png' }, { word: 'rolling pin', img: 'rolling pin.png' },
+{ word: 'saucepan', img: 'saucepan.png' }, { word: 'scale', img: 'scale.png' }, { word: 'sieve', img: 'sieve.png' },
+{ word: 'spatula', img: 'spatula.png' }, { word: 'spoon', img: 'spoon.png' }, { word: 'toaster', img: 'toaster.png' },
+{ word: 'tongs', img: 'tongs.png' }, { word: 'whisk', img: 'whisk.png' }
+],
+Transport: [
+{ word: 'ambulance', img: 'ambulance.png' }, { word: 'bicycle', img: 'bicycle.png' }, { word: 'boat', img: 'boat.png' },
+{ word: 'bus', img: 'bus.png' }, { word: 'car', img: 'car.png' }, { word: 'crane', img: 'crane.png' },
+{ word: 'ferry', img: 'ferry.png' }, { word: 'fire truck', img: 'fire truck.png' }, { word: 'helicopter', img: 'helicopter.png' },
+{ word: 'kayak', img: 'kayak.png' }, { word: 'limousine', img: 'limousine.png' }, { word: 'lorry', img: 'lorry.png' },
+{ word: 'motorcycle', img: 'motorcycle.png' }, { word: 'parachute', img: 'parachute.png' }, { word: 'plane', img: 'plane.png' },
+{ word: 'rocket', img: 'rocket.png' }, { word: 'ship', img: 'ship.png' }, { word: 'submarine', img: 'submarine.png' },
+{ word: 'subway', img: 'subway.png' }, { word: 'taxi', img: 'taxi.png' }, { word: 'train', img: 'train.png' },
+{ word: 'tram', img: 'tram.png' }, { word: 'truck', img: 'truck.png' }, { word: 'yacht', img: 'yacht.png' }
+],
+Music: [
+{ word: 'album', img: 'album.png' }, { word: 'bass', img: 'bass.png' }, { word: 'beat', img: 'beat.png' },
+{ word: 'cello', img: 'cello.png' }, { word: 'chorus', img: 'chorus.png' }, { word: 'clarinet', img: 'clarinet.png' },
+{ word: 'composer', img: 'composer.png' }, { word: 'concert', img: 'concert.jpg' }, { word: 'conductor', img: 'conductor.png' },
+{ word: 'dance', img: 'dance.png' }, { word: 'drummer', img: 'drummer.png' }, { word: 'drums', img: 'drums.png' },
+{ word: 'flute', img: 'flute.png' }, { word: 'group', img: 'group.png' }, { word: 'guitar', img: 'guitar.png' },
+{ word: 'guitarist', img: 'guitarist.jpg' }, { word: 'harmony', img: 'harmony.jpg' }, { word: 'harp', img: 'harp.png' },
+{ word: 'melody', img: 'melody.jpg' }, { word: 'musician', img: 'musician.png' }, { word: 'note', img: 'note.png' },
+{ word: 'piano', img: 'piano.png' }, { word: 'saxophone', img: 'saxophone.png' }, { word: 'singer', img: 'singer.png' },
+{ word: 'song', img: 'song.jpg' }, { word: 'sound', img: 'sound.png' }, { word: 'trumpet', img: 'trumpet.png' },
+{ word: 'violin', img: 'violin.png' }, { word: 'voice', img: 'voice.png' }
+],
+Garden: [
+{ word: 'bench', img: 'bench.png' }, { word: 'bridge', img: 'bridge.png' }, { word: 'bush', img: 'bush.png' },
+{ word: 'fence', img: 'fence.png' }, { word: 'flower', img: 'flower.png' }, { word: 'flowerpot', img: 'flowerpot.png' },
+{ word: 'fountain', img: 'fountain.png' }, { word: 'gate', img: 'gate.png' }, { word: 'grass', img: 'grass.png' },
+{ word: 'greenhouse', img: 'greenhouse.png' }, { word: 'hedge', img: 'hedge.jpg' }, { word: 'hose', img: 'hose.png' },
+{ word: 'lawn', img: 'lawn.jpg' }, { word: 'moss', img: 'moss.png' }, { word: 'path', img: 'path.jpg' },
+{ word: 'plant', img: 'plant.png' }, { word: 'pond', img: 'pond.png' }, { word: 'rake', img: 'rake.png' },
+{ word: 'root', img: 'root.png' }, { word: 'rose', img: 'rose.png' }, { word: 'seed', img: 'seed.png' },
+{ word: 'soil', img: 'soil.png' }, { word: 'sunflower', img: 'sunflower.png' }, { word: 'swing', img: 'swing.png' },
+{ word: 'tree', img: 'tree.png' }, { word: 'tulip', img: 'tulip.png' }, { word: 'watering can', img: 'watering can.png' },
+{ word: 'wheelbarrow', img: 'wheelbarrow.png' }
+],
+Bathroom: [
+{ word: 'bath', img: 'bath.png' }, { word: 'shower', img: 'shower.png' }, { word: 'sink', img: 'sink.png' },
+{ word: 'toilet', img: 'toilet.png' }, { word: 'mirror', img: 'mirror.png' }, { word: 'towel', img: 'towel.png' },
+{ word: 'soap', img: 'soap.png' }, { word: 'shampoo', img: 'shampoo.png' }, { word: 'comb', img: 'comb.png' },
+{ word: 'sponge', img: 'sponge.png' }, { word: 'toothbrush', img: 'toothbrush.png' }, { word: 'toothpaste', img: 'toothpaste.png' },
+{ word: 'faucet', img: 'faucet.png' }, { word: 'rubber duck', img: 'rubber duck.png' }, { word: 'shaving cream', img: 'shaving cream.png' },
+{ word: 'toilet paper', img: 'toilet paper.png' }, { word: 'shower curtain', img: 'shower curtain.png' },
+{ word: 'laundry basket', img: 'laundry basket.png' }, { word: 'washing machine', img: 'washing machine.png' },
+{ word: 'hair dryer', img: 'hair dryer.png' }, { word: 'plug', img: 'plug.png' }, { word: 'mouthwash', img: 'mouthwash.png' },
+{ word: 'dental floss', img: 'dental floss.png' }, { word: 'deodorant', img: 'deodorant.png' },
+{ word: 'laundry detergent', img: 'laundry detergent.png' }, { word: 'wet wipes', img: 'wet wipes.png' },
+{ word: 'cotton pads', img: 'cotton pads.jpeg' }, { word: 'razor', img: 'razor.png' }
+],
+Things: [
+{ word: 'bag', img: 'bag.png' }, { word: 'battery', img: 'battery.png' }, { word: 'box', img: 'box.png' },
+{ word: 'candle', img: 'candle.png' }, { word: 'chain', img: 'chain.png' }, { word: 'clock', img: 'clock.png' },
+{ word: 'diary', img: 'diary.png' }, { word: 'flashlight', img: 'flashlight.png' }, { word: 'gift', img: 'gift.png' },
+{ word: 'glasses', img: 'glasses.png' }, { word: 'key', img: 'key.png' }, { word: 'lamp', img: 'lamp.png' },
+{ word: 'letter', img: 'letter.png' }, { word: 'lock', img: 'lock.png' }, { word: 'magnet', img: 'magnet.png' },
+{ word: 'map', img: 'map.png' }, { word: 'needle', img: 'needle.png' }, { word: 'phone', img: 'phone.png' },
+{ word: 'ring', img: 'ring.png' }, { word: 'rope', img: 'rope.png' }, { word: 'scissors', img: 'scissors.png' },
+{ word: 'tape', img: 'tape.png' }, { word: 'thread', img: 'thread.png' }, { word: 'tool', img: 'tool.png' },
+{ word: 'umbrella', img: 'umbrella.png' }, { word: 'wallet', img: 'wallet.png' }, { word: 'watch', img: 'watch.png' }
+],
+Personal: [
+{ word: 'comb', img: 'comb.png' }, { word: 'lipstick', img: 'lipstick.png' }, { word: 'mascara', img: 'mascara.png' },
+{ word: 'mirror', img: 'mirror.png' }, { word: 'nail', img: 'nail.png' }, { word: 'perfume', img: 'perfume.png' },
+{ word: 'powder', img: 'powder.png' }, { word: 'razor', img: 'razor.png' }, { word: 'scissors', img: 'scissors.png' },
+{ word: 'shampoo', img: 'shampoo.png' }, { word: 'soap', img: 'soap.png' }, { word: 'wipes', img: 'wipes.png' },
+{ word: 'charger', img: 'charger.png' }, { word: 'coins', img: 'coins.png' }, { word: 'credit card', img: 'credit card.png' },
+{ word: 'deodorant', img: 'deodorant.png' }, { word: 'full name', img: 'full name.png' }, { word: 'hair dryer', img: 'hair dryer.png' },
+{ word: 'nationality', img: 'nationality.png' }, { word: 'occupation', img: 'occupation.png' }, { word: 'postcode', img: 'postcode.png' },
+{ word: 'power bank', img: 'power bank.png' }, { word: 'signature', img: 'signature.png' }, { word: 'sunglasses', img: 'sunglasses.png' },
+{ word: 'toothbrush', img: 'toothbrush.png' }, { word: 'toothpaste', img: 'toothpaste.png' }, { word: 'towel', img: 'towel.png' },
+{ word: 'watch', img: 'watch.png' }, { word: 'generous', img: 'generous.jpg' }, { word: 'hometown', img: 'hometown.jpg' },
+{ word: 'honest', img: 'honest.jpg' }, { word: 'stubborn', img: 'stubborn.jpg' }, { word: 'confident', img: 'confident.png' },
+{ word: 'hard-working', img: 'hard-working.png' }, { word: 'lazy', img: 'lazy.png' }, { word: 'polite', img: 'polite.png' },
+{ word: 'rude', img: 'rude.png' }, { word: 'selfish', img: 'selfish.png' }, { word: 'shy', img: 'shy.png' }
+],
+Stationery: [
+{ word: 'book', img: 'book.png' }, { word: 'calculator', img: 'calculator.png' }, { word: 'chalk', img: 'chalk.png' },
+{ word: 'compass', img: 'compass.png' }, { word: 'diary', img: 'diary.png' }, { word: 'eraser', img: 'eraser.png' },
+{ word: 'folder', img: 'folder.png' }, { word: 'glue', img: 'glue.png' }, { word: 'hole-punch', img: 'hole-punch.png' },
+{ word: 'ink', img: 'ink.png' }, { word: 'magnifier', img: 'magnifier.png' }, { word: 'marker', img: 'marker.png' },
+{ word: 'notebook', img: 'notebook.png' }, { word: 'paper clip', img: 'paper clip.png' }, { word: 'paper', img: 'paper.png' },
+{ word: 'pen', img: 'pen.png' }, { word: 'pencil-case', img: 'pencil-case.png' }, { word: 'pencil', img: 'pencil.png' },
+{ word: 'post-it', img: 'post-it.png' }, { word: 'protractor', img: 'protractor.png' }, { word: 'push-pin', img: 'push-pin.png' },
+{ word: 'rubber band', img: 'rubber band.png' }, { word: 'ruler', img: 'ruler.png' }, { word: 'scissors', img: 'scissors.png' },
+{ word: 'sharpener', img: 'sharpener.png' }, { word: 'tape', img: 'tape.png' }
+],
+Jobs: [
+{ word: 'accountant', img: 'accountant.png' }, { word: 'actor', img: 'actor.png' }, { word: 'architect', img: 'architect.jpg' },
+{ word: 'artist', img: 'artist.png' }, { word: 'astronaut', img: 'astronaut.jpg' }, { word: 'athlete', img: 'athlete.png' },
+{ word: 'baker', img: 'baker.png' }, { word: 'builder', img: 'builde.png' }, { word: 'cashier', img: 'cashier.png' },
+{ word: 'cook', img: 'cook.png' }, { word: 'dancer', img: 'dancer.png' }, { word: 'dentist', img: 'dentist.png' },
+{ word: 'doctor', img: 'doctor.png' }, { word: 'driver', img: 'driver.png' }, { word: 'electrician', img: 'electrician.png' },
+{ word: 'engineer', img: 'engineer.png' }, { word: 'farmer', img: 'farmer.png' }, { word: 'firefighter', img: 'firefighter.png' },
+{ word: 'fisherman', img: 'fisherman.png' }, { word: 'flight attendant', img: 'flight attendant.jpg' },
+{ word: 'gardener', img: 'gardener.png' }, { word: 'hairdresser', img: 'hairdresser.png' }, { word: 'journalist', img: 'journalist.png' },
+{ word: 'judge', img: 'judge.png' }, { word: 'lawyer', img: 'lawyer.png' }, { word: 'librarian', img: 'librarian.jpg' },
+{ word: 'mechanic', img: 'mechanic.png' }, { word: 'musician', img: 'musician.png' }, { word: 'nurse', img: 'nurse.png' },
+{ word: 'painter', img: 'painter.png' }, { word: 'photographer', img: 'photographer.png' }, { word: 'pilot', img: 'pilot.png' },
+{ word: 'policeman', img: 'policeman.png' }, { word: 'postman', img: 'postman.png' }, { word: 'programmer', img: 'programmer.png' },
+{ word: 'receptionist', img: 'receptionist.jpg' }, { word: 'scientist', img: 'scientist.jpg' }, { word: 'secretary', img: 'secretary.png' },
+{ word: 'singer', img: 'singer.png' }, { word: 'soldier', img: 'soldier.png' }, { word: 'tailor', img: 'tailor.png' },
+{ word: 'teacher', img: 'teacher.png' }, { word: 'translator', img: 'translator.jpg' }, { word: 'veterinarian', img: 'veterinarian.jpg' },
+{ word: 'waiter', img: 'waiter.png' }, { word: 'waitress', img: 'waitress.png' }, { word: 'writer', img: 'writer.png' }
+],
+Nature: [
+{ word: 'aurora', img: 'aurora.jpg' }, { word: 'beach', img: 'beach.jpg' }, { word: 'bush', img: 'bush.png' },
+{ word: 'canyon', img: 'canyon.jpg' }, { word: 'cave', img: 'cave.png' }, { word: 'coast', img: 'coast.webp' },
+{ word: 'desert', img: 'desert.jpg' }, { word: 'earth', img: 'earth.png' }, { word: 'field', img: 'field.jpg' },
+{ word: 'flower', img: 'flower.png' }, { word: 'forest', img: 'forest.jpg' }, { word: 'glacier', img: 'glacier.png' },
+{ word: 'grass', img: 'grass.png' }, { word: 'iceberg', img: 'iceberg.jpg' }, { word: 'island', img: 'island.jpg' },
+{ word: 'jungle', img: 'jungle.jpg' }, { word: 'lake', img: 'lake.jpg' }, { word: 'meadow', img: 'meadow.jpg' },
+{ word: 'mountain', img: 'mountain.png' }, { word: 'ocean', img: 'ocean.jpg' }, { word: 'plant', img: 'plant.png' },
+{ word: 'river', img: 'river.png' }, { word: 'sky', img: 'sky.jpg' }, { word: 'sun', img: 'sun.png' },
+{ word: 'swamp', img: 'swamp.avif' }, { word: 'tree', img: 'tree.png' }, { word: 'valley', img: 'valley.jpg' },
+{ word: 'volcano', img: 'volcano.png' }, { word: 'waterfall', img: 'waterfall.png' }
+],
+Subjects: [
+{ word: 'art', img: 'art.png' }, { word: 'astronomy', img: 'astronomy.png' }, { word: 'biology', img: 'biology.png' },
+{ word: 'chemistry', img: 'chemistry.png' }, { word: 'economics', img: 'economics.png' }, { word: 'english', img: 'english.png' },
+{ word: 'foreign language', img: 'foreign language.png' }, { word: 'geography', img: 'geography.png' },
+{ word: 'geometry', img: 'geometry.png' }, { word: 'history', img: 'history.jpg' },
+{ word: 'information technology', img: 'information technology.png' }, { word: 'literature', img: 'literature.png' },
+{ word: 'math', img: 'math.png' }, { word: 'music', img: 'music.png' }, { word: 'pe', img: 'pe.png' },
+{ word: 'physics', img: 'physics.png' }, { word: 'science', img: 'science.png' }
+],
+Space: [
+{ word: 'alien', img: 'alien.png' }, { word: 'astronaut', img: 'astronaut.png' }, { word: 'black hole', img: 'black hole.png' },
+{ word: 'comet', img: 'comet.png' }, { word: 'earth', img: 'earth.png' }, { word: 'eclipse', img: 'eclipse.avif' },
+{ word: 'galaxy', img: 'galaxy.png' }, { word: 'moon', img: 'moon.png' }, { word: 'observatory', img: 'observatory.png' },
+{ word: 'orbit', img: 'orbit.jpg' }, { word: 'planet', img: 'planet.jpg' }, { word: 'rocket', img: 'rocket.png' },
+{ word: 'satellite', img: 'satellite.png' }, { word: 'star', img: 'star.png' }, { word: 'sun', img: 'sun.png' },
+{ word: 'telescope', img: 'telescope.png' }
+],
+Countries: [
+{ word: 'Australia', img: 'australia.png' }, { word: 'Belarus', img: 'belarus.png' }, { word: 'Brazil', img: 'brazil.png' },
+{ word: 'Canada', img: 'canada.png' }, { word: 'China', img: 'china.png' }, { word: 'Egypt', img: 'egypt.png' },
+{ word: 'France', img: 'france.png' }, { word: 'Germany', img: 'germany.png' }, { word: 'Greece', img: 'greece.png' },
+{ word: 'India', img: 'india.png' }, { word: 'Iran', img: 'iran.png' }, { word: 'Iraq', img: 'iraq.png' },
+{ word: 'Italy', img: 'italy.png' }, { word: 'Japan', img: 'japan.png' }, { word: 'Latvia', img: 'latvia.png' },
+{ word: 'Lithuania', img: 'lithuania.png' }, { word: 'Mexico', img: 'mexico.png' }, { word: 'Poland', img: 'poland.png' },
+{ word: 'Russia', img: 'russia.png' }, { word: 'Spain', img: 'spain.png' }, { word: 'Turkey', img: 'turkey.png' },
+{ word: 'UK', img: 'uk.png' }, { word: 'Ukraine', img: 'ukraine.png' }, { word: 'United Arab Emirates', img: 'united arab emirates.png' },
+{ word: 'USA', img: 'usa.png' }, { word: 'Vietnam', img: 'vietnam.png' }
+],
+Technology: [
+{ word: 'adapter', img: 'adapter.png' }, { word: 'camera', img: 'camera.png' }, { word: 'charger', img: 'charger.png' },
+{ word: 'computer', img: 'computer.png' }, { word: 'e-reader', img: 'e-reader.png' }, { word: 'gadget', img: 'gadget.jpg' },
+{ word: 'keyboard', img: 'keyboard.png' }, { word: 'laptop', img: 'laptop.png' }, { word: 'microphone', img: 'microphone.png' },
+{ word: 'monitor', img: 'monitor.png' }, { word: 'mouse', img: 'mouse.png' }, { word: 'phone', img: 'phone.png' },
+{ word: 'power bank', img: 'power bank.png' }, { word: 'printer', img: 'printer.png' }, { word: 'projector', img: 'projector.png' },
+{ word: 'robot', img: 'robot.png' }, { word: 'scanner', img: 'scanner.png' }, { word: 'speaker', img: 'speaker.png' },
+{ word: 'stylus', img: 'stylus.png' }, { word: 'tablet', img: 'tablet.png' }, { word: 'VR headset', img: 'VR headset.png' }
+],
+Computer: [
+{ word: 'bluetooth', img: 'bluetooth.png' }, { word: 'button', img: 'button.png' }, { word: 'cpu', img: 'cpu.png' },
+{ word: 'cursor', img: 'cursor.png' }, { word: 'data', img: 'data.png' }, { word: 'emoji', img: 'emoji.png' },
+{ word: 'ethernet', img: 'ethernet.png' }, { word: 'fan', img: 'fan.png' }, { word: 'file', img: 'file.png' },
+{ word: 'folder', img: 'folder.png' }, { word: 'game', img: 'game.png' }, { word: 'graphics', img: 'graphics.jpg' },
+{ word: 'harddrive', img: 'harddrive.png' }, { word: 'hyperlink', img: 'hyperlink.png' }, { word: 'keyboard', img: 'keyboard.png' },
+{ word: 'monitor', img: 'monitor.png' }, { word: 'motherboard', img: 'motherboard.png' }, { word: 'mouse', img: 'mouse.png' },
+{ word: 'powersupply', img: 'powersupply.png' }, { word: 'ram', img: 'ram.png' }, { word: 'screen', img: 'screen.png' },
+{ word: 'usb', img: 'usb.png' }, { word: 'user', img: 'user.png' }, { word: 'wifi', img: 'wifi.png' }
+],
+Hospital: [
+{ word: 'ambulance', img: 'ambulance.png' }, { word: 'bandage', img: 'bandage.png' }, { word: 'bed', img: 'bed.png' },
+{ word: 'blood', img: 'blood.png' }, { word: 'burn', img: 'burn.png' }, { word: 'cast', img: 'cast.png' },
+{ word: 'clinic', img: 'clinic.png' }, { word: 'crutches', img: 'crutches.png' }, { word: 'dentist', img: 'dentist.png' },
+{ word: 'diagnosis', img: 'diagnosis.png' }, { word: 'doctor', img: 'doctor.png' }, { word: 'emergency', img: 'emergency.png' },
+{ word: 'fracture', img: 'fracture.png' }, { word: 'heart', img: 'heart.png' }, { word: 'infection', img: 'infection.png' },
+{ word: 'medicine', img: 'medicine.png' }, { word: 'nurse', img: 'nurse.png' }, { word: 'operation', img: 'operation.png' },
+{ word: 'patient', img: 'patient.png' }, { word: 'pill', img: 'pill.png' }, { word: 'prescription', img: 'prescription.png' },
+{ word: 'stethoscope', img: 'stethoscope.png' }, { word: 'symptom', img: 'symptom.png' }, { word: 'syringe', img: 'syringe.png' },
+{ word: 'vitamin', img: 'vitamin.png' }, { word: 'wheelchair', img: 'wheelchair.png' }
+],
+Colors: [
+{ word: 'black', img: 'black.avif' }, { word: 'blue', img: 'blue.avif' }, { word: 'brown', img: 'brown.png' },
+{ word: 'gray', img: 'gray.avif' }, { word: 'green', img: 'green.avif' }, { word: 'light green', img: 'light_green.jpg' },
+{ word: 'orange', img: 'orange.jpg' }, { word: 'pink', img: 'pink.jpg' }, { word: 'purple', img: 'purple.jpg' },
+{ word: 'red', img: 'red.avif' }, { word: 'white', img: 'white.avif' }, { word: 'yellow', img: 'yellow.avif' }
+],
+Numbers: [
+{ word: 'zero', img: 'zero.png' }, { word: 'one', img: 'one.png' }, { word: 'two', img: 'two.png' },
+{ word: 'three', img: 'three.png' }, { word: 'four', img: 'four.png' }, { word: 'five', img: 'five.png' },
+{ word: 'six', img: 'six.png' }, { word: 'seven', img: 'seven.png' }, { word: 'eight', img: 'eight.png' },
+{ word: 'nine', img: 'nine.png' }, { word: 'ten', img: 'ten.png' }, { word: 'eleven', img: 'eleven.png' },
+{ word: 'twelve', img: 'twelve.png' }
+]
+};
+
+// ==================== TRANSLATIONS ====================
+const TRANSLATIONS = {
+'ant': 'муравей', 'bat': 'летучая мышь', 'bear': 'медведь', 'bee': 'пчела',
+'bird': 'птица', 'buffalo': 'буйвол', 'butterfly': 'бабочка', 'cat': 'кот',
+'chicken': 'курица', 'cow': 'корова', 'crocodile': 'крокодил', 'crow': 'ворона',
+'deer': 'олень', 'dog': 'собака', 'dolphin': 'дельфин', 'donkey': 'осёл',
+'duck': 'утка', 'eagle': 'орёл', 'elephant': 'слон', 'elk': 'лось',
+'fly': 'муха', 'fox': 'лиса', 'frog': 'лягушка', 'giraffe': 'жираф',
+'goat': 'козёл', 'goose': 'гусь', 'guinea pig': 'морская свинка', 'hamster': 'хомяк',
+'hedgehog': 'ёжик', 'hippo': 'бегемот', 'horse': 'лошадь', 'kangaroo': 'кенгуру',
+'koala': 'коала', 'ladybug': 'божья коровка', 'leopard': 'леопард', 'lion': 'лев',
+'lizard': 'ящерица', 'mole': 'крот', 'monkey': 'обезьяна', 'owl': 'сова',
+'panda': 'панда', 'parrot': 'попугай', 'penguin': 'пингвин', 'pig': 'свинья',
+'rabbit': 'кролик', 'raccoon': 'енот', 'rhino': 'носорог', 'seal': 'тюлень',
+'shark': 'акула', 'sheep': 'овца', 'snail': 'улитка', 'snake': 'змея',
+'sparrow': 'воробей', 'spider': 'паук', 'squirrel': 'белка', 'tiger': 'тигр',
+'turkey': 'индюк', 'turtle': 'черепаха', 'whale': 'кит', 'worm': 'червь', 'zebra': 'зебра',
+'apple': 'яблоко', 'apricot': 'абрикос', 'avocado': 'авокадо', 'bacon': 'бекон',
+'banana': 'банан', 'bean': 'фасоль', 'bread': 'хлеб', 'broccoli': 'брокколи',
+'burger': 'бургер', 'butter': 'сливочное масло', 'cabbage': 'капуста', 'cake': 'торт',
+'candy': 'конфета', 'carrot': 'морковь', 'cauliflower': 'цветная капуста',
+'celery': 'сельдерей', 'cereal': 'хлопья', 'cheese': 'сыр', 'cherry': 'вишня',
+'chocolate': 'шоколад', 'coconut': 'кокос', 'coffee': 'кофе',
+'cookie': 'печенье', 'corn': 'кукуруза', 'cucumber': 'огурец', 'date': 'финик',
+'donut': 'пончик', 'egg': 'яйцо', 'eggplant': 'баклажан', 'fig': 'инжир',
+'fish': 'рыба', 'fries': 'картошка фри', 'garlic': 'чеснок', 'grape': 'виноград',
+'ham': 'ветчина', 'honey': 'мёд', 'ice cream': 'мороженое', 'jam': 'джем',
+'juice': 'сок', 'kiwi': 'киви', 'lemon': 'лимон', 'lime': 'лайм',
+'mango': 'манго', 'meat': 'мясо', 'milk': 'молоко', 'milkshake': 'молочный коктейль',
+'muffin': 'маффин', 'mushroom': 'гриб', 'nectarine': 'нектарин', 'noodles': 'лапша',
+'oil': 'растительное масло', 'onion': 'лук', 'pancake': 'блин',
+'pasta': 'паста', 'pea': 'горох', 'peach': 'персик', 'pear': 'груша',
+'pepper': 'перец', 'pie': 'пирог', 'pineapple': 'ананас', 'pizza': 'пицца',
+'plum': 'слива', 'potato': 'картофель', 'pumpkin': 'тыква', 'radish': 'редис',
+'rice': 'рис', 'salad': 'салат', 'salt': 'соль', 'sandwich': 'бутерброд',
+'sausage': 'сосиска', 'soda': 'газировка', 'soup': 'суп', 'spinach': 'шпинат',
+'steak': 'стейк', 'stew': 'рагу', 'strawberry': 'клубника', 'sugar': 'сахар',
+'tea': 'чай', 'toast': 'тост', 'tomato': 'помидор', 'waffle': 'вафля',
+'water': 'вода', 'watermelon': 'арбуз', 'yogurt': 'йогурт', 'zucchini': 'кабачок',
+'baby': 'младенец', 'brother': 'брат', 'father': 'отец', 'mother': 'мать',
+'sister': 'сестра', 'grandfather': 'дедушка', 'grandmother': 'бабушка',
+'twins': 'близнецы', 'children': 'дети', 'parents': 'родители',
+'ball': 'мяч', 'plush toy': 'плюшевая игрушка', 'blocks': 'кубики', 'boat': 'лодка',
+'car': 'машина', 'doll': 'кукла', 'drum': 'барабан', 'kite': 'воздушный змей',
+'plane': 'самолёт', 'puzzle': 'пазл', 'robot': 'робот', 'train': 'поезд',
+'castle': 'замок', 'tent': 'палатка', 'water gun': 'водяной пистолет',
+'archery': 'стрельба из лука', 'badminton': 'бадминтон', 'baseball': 'бейсбол',
+'basketball': 'баскетбол', 'boxing': 'бокс', 'cycling': 'велоспорт',
+'fencing': 'фехтование', 'football': 'футбол', 'golf': 'гольф',
+'gymnastics': 'гимнастика', 'hockey': 'хоккей', 'karate': 'карате',
+'rugby': 'регби', 'running': 'бег', 'skating': 'катание на коньках',
+'skiing': 'катание на лыжах', 'surfing': 'сёрфинг', 'swimming': 'плавание',
+'table tennis': 'настольный теннис', 'tennis': 'теннис',
+'volleyball': 'волейбол', 'yoga': 'йога',
+'belt': 'ремень', 'blouse': 'блузка', 'boots': 'сапоги', 'cap': 'кепка',
+'coat': 'пальто', 'dress': 'платье', 'gloves': 'перчатки', 'hat': 'шляпа',
+'hoodie': 'худи', 'jacket': 'куртка', 'jeans': 'джинсы', 'leggings': 'леггинсы',
+'pants': 'штаны', 'pyjamas': 'пижама', 'raincoat': 'плащ', 'sandals': 'сандалии',
+'scarf': 'шарф', 'shirt': 'рубашка', 'shoes': 'туфли', 'shorts': 'шорты',
+'skirt': 'юбка', 'socks': 'носки', 'sweater': 'свитер', 'tie': 'галстук',
+'arm': 'рука', 'back': 'спина', 'chin': 'подбородок', 'ear': 'ухо',
+'elbow': 'локоть', 'eye': 'глаз', 'eyebrows': 'брови', 'eyelash': 'ресница',
+'face': 'лицо', 'finger': 'палец', 'foot': 'стопа', 'forehead': 'лоб',
+'hair': 'волосы', 'hand': 'кисть руки', 'head': 'голова', 'leg': 'нога',
+'lips': 'губы', 'mouth': 'рот', 'neck': 'шея', 'nose': 'нос',
+'shoulder': 'плечо', 'stomach': 'живот', 'thumb': 'большой палец',
+'toe': 'палец ноги', 'tongue': 'язык',
+'autumn': 'осень', 'cloud': 'облако', 'cold': 'холодно', 'drought': 'засуха',
+'flood': 'наводнение', 'fog': 'туман', 'hail': 'град', 'hot': 'жарко',
+'lightning': 'молния', 'mist': 'дымка', 'rain': 'дождь', 'rainbow': 'радуга',
+'season': 'время года', 'snow': 'снег', 'spring': 'весна', 'storm': 'шторм',
+'summer': 'лето', 'sun': 'солнце', 'temperature': 'температура',
+'tornado': 'торнадо', 'wind': 'ветер', 'winter': 'зима',
+'armchair': 'кресло', 'balcony': 'балкон', 'basement': 'подвал',
+'bathroom': 'ванная', 'bed': 'кровать', 'carpet': 'ковёр',
+'chair': 'стул', 'chimney': 'дымоход', 'closet': 'шкаф',
+'curtain': 'штора', 'door': 'дверь', 'fence': 'забор',
+'floor': 'пол', 'garage': 'гараж', 'garden': 'сад',
+'gate': 'ворота', 'hallway': 'коридор', 'kitchen': 'кухня',
+'room': 'комната', 'roof': 'крыша', 'sofa': 'диван',
+'stairs': 'лестница', 'table': 'стол', 'wall': 'стена', 'window': 'окно',
+'airport': 'аэропорт', 'bakery': 'пекарня', 'bank': 'банк',
+'bar': 'бар', 'bookstore': 'книжный магазин', 'bus stop': 'остановка',
+'cafe': 'кафе', 'cemetery': 'кладбище',
+'church': 'церковь', 'cinema': 'кинотеатр', 'circus': 'цирк',
+'clinic': 'клиника', 'college': 'колледж', 'courthouse': 'здание суда',
+'factory': 'завод', 'farm': 'ферма', 'fire station': 'пожарная часть',
+'gym': 'спортзал', 'hospital': 'больница', 'hotel': 'отель',
+'house': 'дом', 'library': 'библиотека', 'lighthouse': 'маяк',
+'market': 'рынок', 'mosque': 'мечеть', 'museum': 'музей',
+'office': 'офис', 'palace': 'дворец', 'park': 'парк',
+'playground': 'детская площадка', 'police station': 'полицейский участок',
+'port': 'порт', 'post office': 'почта', 'prison': 'тюрьма',
+'restaurant': 'ресторан', 'school': 'школа', 'shop': 'магазин',
+'skyscraper': 'небоскреб', 'square': 'площадь', 'stadium': 'стадион',
+'station': 'вокзал', 'temple': 'храм', 'theater': 'театр',
+'tower': 'башня', 'train station': 'вокзал', 'university': 'университет', 'zoo': 'зоопарк',
+'blender': 'блендер', 'bowl': 'миска', 'chopping board': 'разделочная доска',
+'colander': 'дуршлаг', 'cooker': 'плита', 'corkscrew': 'штопор',
+'cup': 'чашка', 'dishwasher': 'посудомоечная машина', 'fork': 'вилка',
+'freezer': 'морозильник', 'fridge': 'холодильник', 'grater': 'тёрка',
+'kettle': 'чайник', 'knife': 'нож', 'ladle': 'половник',
+'microwave': 'микроволновка', 'mixer': 'миксер', 'mug': 'кружка',
+'oven': 'духовка', 'pan': 'сковорода', 'peeler': 'овощечистка',
+'plate': 'тарелка', 'pot': 'кастрюля', 'rolling pin': 'скалка',
+'saucepan': 'сотейник', 'scale': 'весы', 'sieve': 'сито',
+'spatula': 'лопатка', 'spoon': 'ложка', 'toaster': 'тостер',
+'tongs': 'щипцы', 'whisk': 'венчик',
+'ambulance': 'скорая помощь', 'bicycle': 'велосипед',
+'bus': 'автобус', 'crane': 'кран',
+'ferry': 'паром', 'fire truck': 'пожарная машина', 'helicopter': 'вертолёт',
+'kayak': 'байдарка', 'limousine': 'лимузин', 'lorry': 'грузовик',
+'motorcycle': 'мотоцикл', 'parachute': 'парашют',
+'rocket': 'ракета', 'ship': 'корабль', 'submarine': 'подводная лодка',
+'subway': 'метро', 'taxi': 'такси',
+'tram': 'трамвай', 'truck': 'грузовик', 'yacht': 'яхта',
+'album': 'альбом', 'bass': 'бас', 'beat': 'ритм', 'cello': 'виолончель',
+'chorus': 'припев', 'clarinet': 'кларнет', 'composer': 'композитор',
+'concert': 'концерт', 'conductor': 'дирижёр', 'dance': 'танец',
+'drummer': 'барабанщик', 'drums': 'барабаны', 'flute': 'флейта',
+'group': 'группа', 'guitar': 'гитара', 'guitarist': 'гитарист',
+'harmony': 'гармония', 'harp': 'арфа', 'melody': 'мелодия',
+'musician': 'музыкант', 'note': 'нота', 'piano': 'пианино',
+'saxophone': 'саксофон', 'singer': 'певец', 'song': 'песня',
+'sound': 'звук', 'trumpet': 'труба', 'violin': 'скрипка', 'voice': 'голос',
+'bench': 'скамейка', 'bridge': 'мост', 'bush': 'куст',
+'flower': 'цветок', 'flowerpot': 'цветочный горшок',
+'fountain': 'фонтан', 'grass': 'трава',
+'greenhouse': 'теплица', 'hedge': 'живая изгородь', 'hose': 'шланг',
+'lawn': 'газон', 'moss': 'мох', 'path': 'дорожка',
+'plant': 'растение', 'pond': 'пруд', 'rake': 'грабли',
+'root': 'корень', 'rose': 'роза', 'seed': 'семя',
+'soil': 'почва', 'sunflower': 'подсолнух', 'swing': 'качели',
+'tree': 'дерево', 'tulip': 'тюльпан', 'watering can': 'лейка', 'wheelbarrow': 'тачка',
+'bath': 'ванна', 'shower': 'душ', 'sink': 'раковина',
+'toilet': 'унитаз', 'mirror': 'зеркало', 'towel': 'полотенце',
+'soap': 'мыло', 'shampoo': 'шампунь', 'comb': 'расчёска',
+'sponge': 'губка', 'toothbrush': 'зубная щётка', 'toothpaste': 'зубная паста',
+'faucet': 'кран', 'rubber duck': 'резиновая уточка', 'shaving cream': 'пена для бритья',
+'toilet paper': 'туалетная бумага', 'shower curtain': 'шторка для душа',
+'laundry basket': 'корзина для белья', 'washing machine': 'стиральная машина',
+'hair dryer': 'фен', 'plug': 'пробка', 'mouthwash': 'ополаскиватель',
+'dental floss': 'зубная нить', 'deodorant': 'дезодорант',
+'laundry detergent': 'стиральный порошок', 'wet wipes': 'влажные салфетки',
+'cotton pads': 'ватные диски', 'razor': 'бритва',
+'bag': 'сумка', 'battery': 'батарейка', 'box': 'коробка',
+'candle': 'свеча', 'chain': 'цепь', 'clock': 'часы',
+'diary': 'дневник', 'flashlight': 'фонарик', 'gift': 'подарок',
+'glasses': 'очки', 'key': 'ключ', 'lamp': 'лампа',
+'letter': 'письмо', 'lock': 'замок', 'magnet': 'магнит',
+'map': 'карта', 'needle': 'иголка', 'phone': 'телефон',
+'ring': 'кольцо', 'rope': 'верёвка', 'scissors': 'ножницы',
+'tape': 'скотч', 'thread': 'нитка', 'tool': 'инструмент',
+'umbrella': 'зонт', 'wallet': 'бумажник', 'watch': 'часы',
+'lipstick': 'помада', 'mascara': 'тушь',
+'nail': 'ноготь', 'perfume': 'духи',
+'powder': 'пудра', 'wipes': 'салфетки',
+'charger': 'зарядка', 'coins': 'монеты', 'credit card': 'кредитная карта',
+'full name': 'полное имя',
+'nationality': 'национальность', 'occupation': 'профессия',
+'postcode': 'почтовый индекс', 'power bank': 'внешний аккумулятор',
+'signature': 'подпись', 'sunglasses': 'солнечные очки',
+'generous': 'щедрый', 'hometown': 'родной город', 'honest': 'честный',
+'stubborn': 'упрямый', 'confident': 'уверенный', 'hard-working': 'трудолюбивый',
+'lazy': 'ленивый', 'polite': 'вежливый', 'rude': 'грубый',
+'selfish': 'эгоистичный', 'shy': 'застенчивый',
+'book': 'книга', 'calculator': 'калькулятор', 'chalk': 'мел',
+'compass': 'циркуль', 'eraser': 'ластик',
+'folder': 'папка', 'glue': 'клей', 'hole-punch': 'дырокол',
+'ink': 'чернила', 'magnifier': 'лупа', 'marker': 'маркер',
+'notebook': 'тетрадь', 'paper clip': 'скрепка', 'paper': 'бумага',
+'pen': 'ручка', 'pencil-case': 'пенал', 'pencil': 'карандаш',
+'post-it': 'стикер', 'protractor': 'транспортир', 'push-pin': 'кнопка',
+'rubber band': 'резинка', 'ruler': 'линейка',
+'sharpener': 'точилка',
+'accountant': 'бухгалтер', 'actor': 'актёр', 'architect': 'архитектор',
+'artist': 'художник', 'astronaut': 'космонавт', 'athlete': 'спортсмен',
+'baker': 'пекарь', 'builder': 'строитель', 'cashier': 'кассир',
+'cook': 'повар', 'dancer': 'танцор', 'dentist': 'стоматолог',
+'doctor': 'врач', 'driver': 'водитель', 'electrician': 'электрик',
+'engineer': 'инженер', 'farmer': 'фермер', 'firefighter': 'пожарный',
+'fisherman': 'рыбак', 'flight attendant': 'стюардесса', 'gardener': 'садовник',
+'hairdresser': 'парикмахер', 'journalist': 'журналист', 'judge': 'судья',
+'lawyer': 'адвокат', 'librarian': 'библиотекарь', 'mechanic': 'механик',
+'nurse': 'медсестра', 'painter': 'художник',
+'photographer': 'фотограф', 'pilot': 'пилот', 'policeman': 'полицейский',
+'postman': 'почтальон', 'programmer': 'программист', 'receptionist': 'администратор',
+'scientist': 'учёный', 'secretary': 'секретарь',
+'soldier': 'солдат', 'tailor': 'портной', 'teacher': 'учитель',
+'translator': 'переводчик', 'veterinarian': 'ветеринар', 'waiter': 'официант',
+'waitress': 'официантка', 'writer': 'писатель',
+'aurora': 'северное сияние', 'beach': 'пляж',
+'canyon': 'каньон', 'cave': 'пещера', 'coast': 'побережье',
+'desert': 'пустыня', 'earth': 'земля', 'field': 'поле',
+'forest': 'лес', 'glacier': 'ледник',
+'iceberg': 'айсберг', 'island': 'остров',
+'jungle': 'джунгли', 'lake': 'озеро', 'meadow': 'луг',
+'mountain': 'гора', 'ocean': 'океан',
+'river': 'река', 'sky': 'небо',
+'swamp': 'болото', 'valley': 'долина',
+'volcano': 'вулкан', 'waterfall': 'водопад',
+'art': 'рисование', 'astronomy': 'астрономия', 'biology': 'биология',
+'chemistry': 'химия', 'economics': 'экономика', 'english': 'английский',
+'foreign language': 'иностранный язык', 'geography': 'география',
+'geometry': 'геометрия', 'history': 'история',
+'information technology': 'информационные технологии', 'literature': 'литература',
+'math': 'математика', 'music': 'музыка', 'pe': 'физкультура',
+'physics': 'физика', 'science': 'естествознание',
+'alien': 'инопланетянин', 'black hole': 'чёрная дыра',
+'comet': 'комета', 'eclipse': 'затмение',
+'galaxy': 'галактика', 'moon': 'луна', 'observatory': 'обсерватория',
+'orbit': 'орбита', 'planet': 'планета',
+'satellite': 'спутник', 'star': 'звезда', 'telescope': 'телескоп',
+'Australia': 'Австралия', 'Belarus': 'Беларусь', 'Brazil': 'Бразилия',
+'Canada': 'Канада', 'China': 'Китай', 'Egypt': 'Египет',
+'France': 'Франция', 'Germany': 'Германия', 'Greece': 'Греция',
+'India': 'Индия', 'Iran': 'Иран', 'Iraq': 'Ирак',
+'Italy': 'Италия', 'Japan': 'Япония', 'Latvia': 'Латвия',
+'Lithuania': 'Литва', 'Mexico': 'Мексика', 'Poland': 'Польша',
+'Russia': 'Россия', 'Spain': 'Испания', 'Turkey': 'Турция',
+'UK': 'Великобритания', 'Ukraine': 'Украина', 'United Arab Emirates': 'ОАЭ',
+'USA': 'США', 'Vietnam': 'Вьетнам',
+'adapter': 'адаптер', 'camera': 'камера',
+'computer': 'компьютер', 'e-reader': 'электронная книга',
+'gadget': 'гаджет', 'keyboard': 'клавиатура', 'laptop': 'ноутбук',
+'microphone': 'микрофон', 'monitor': 'монитор', 'mouse': 'мышь',
+'printer': 'принтер', 'projector': 'проектор',
+'scanner': 'сканер', 'speaker': 'колонка', 'stylus': 'стилус',
+'tablet': 'планшет', 'VR headset': 'VR-шлем',
+'bluetooth': 'блютуз', 'button': 'кнопка', 'cpu': 'процессор',
+'cursor': 'курсор', 'data': 'данные', 'emoji': 'эмодзи',
+'ethernet': 'интернет-кабель', 'fan': 'вентилятор', 'file': 'файл',
+'game': 'игра', 'graphics': 'графика',
+'harddrive': 'жесткий диск', 'hyperlink': 'гиперссылка',
+'motherboard': 'материнская плата', 'powersupply': 'блок питания', 'ram': 'оперативная память',
+'screen': 'экран', 'usb': 'USB-порт', 'user': 'пользователь', 'wifi': 'вай-фай',
+'bandage': 'бинт', 'blood': 'кровь', 'burn': 'ожог', 'cast': 'гипс',
+'crutches': 'костыли',
+'diagnosis': 'диагноз', 'emergency': 'скорая помощь',
+'fracture': 'перелом', 'heart': 'сердце', 'infection': 'инфекция',
+'medicine': 'лекарство', 'operation': 'операция',
+'patient': 'пациент', 'pill': 'таблетка', 'prescription': 'рецепт',
+'stethoscope': 'стетоскоп', 'symptom': 'симптом', 'syringe': 'шприц',
+'vitamin': 'витамин', 'wheelchair': 'инвалидная коляска',
+'black': 'чёрный', 'blue': 'синий', 'brown': 'коричневый',
+'gray': 'серый', 'green': 'зелёный', 'light green': 'светло-зелёный',
+'orange': 'оранжевый', 'pink': 'розовый', 'purple': 'фиолетовый',
+'red': 'красный', 'white': 'белый', 'yellow': 'жёлтый',
+'zero': 'ноль', 'one': 'один', 'two': 'два', 'three': 'три',
+'four': 'четыре', 'five': 'пять', 'six': 'шесть', 'seven': 'семь',
+'eight': 'восемь', 'nine': 'девять', 'ten': 'десять',
+'eleven': 'одиннадцать', 'twelve': 'двенадцать'
+};
+
+const AUDIO_WORDS = [
+'ананас', 'апельсин', 'аэропорт', 'блютуз', 'время года',
+'данные', 'дезодорант', 'замок', 'индюк', 'интернет-кабель',
+'кассир', 'кисть руки', 'леггинсы', 'медведь', 'микроволновка',
+'овощечистка', 'ополаскиватель', 'оранжевый', 'палец ноги',
+'растительное масло', 'светло-зелёный', 'сканер', 'сливочное масло',
+'стрельба из лука', 'цепь', 'штопор', 'USB-порт', 'VR-шлем'
+];
+
+const PRAISE_PHRASES = {
+  excellent: ['Excellent!', 'Brilliant!', 'Outstanding!', 'Amazing!', 'Perfect!'],
+  great: ['Great!', 'Well done!', 'Good job!', 'Nice work!', 'Very good!'],
+  good: ['Not bad!', 'Good try!', 'Okay!', 'Nice!', 'Alright!']
+};
+
+function getPraisePhrase(timeSeconds) {
+  if (timeSeconds <= 2) return PRAISE_PHRASES.excellent[Math.floor(Math.random() * 5)];
+  else if (timeSeconds <= 4) return PRAISE_PHRASES.great[Math.floor(Math.random() * 5)];
+  else if (timeSeconds <= 5) return PRAISE_PHRASES.good[Math.floor(Math.random() * 5)];
+  return null;
+}
+
+function speakPraise(timeSeconds) {
+  if (soundEnabled === false) return;
+  const phrase = getPraisePhrase(timeSeconds);
+  if (phrase === null) return;
+  if (window.speechSynthesis === undefined) return;
+
+  const sayPraise = function() {
+    const utterance = new SpeechSynthesisUtterance(phrase);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Если слово ещё говорится — ждём его onend
+  if (_currentUtterance && window.speechSynthesis.speaking) {
+    _currentUtterance.onend = function() {
+      _currentUtterance.onend = null;
+      sayPraise();
+    };
+    return;
+  }
+
+  sayPraise();
+}
+
+let soundEnabled = true;
+let _currentUtterance = null;
+
+function playSound(type) {
+  if (soundEnabled === false) return;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    if (type === 'correct') {
+      oscillator.frequency.setValueAtTime(523, audioCtx.currentTime);
+      oscillator.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1);
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.2);
+    } else if (type === 'wrong') {
+      oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.3);
+    } else if (type === 'win') {
+      const notes = [523, 587, 659, 784];
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.1);
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.1 + 0.15);
+        osc.start(audioCtx.currentTime + i * 0.1);
+        osc.stop(audioCtx.currentTime + i * 0.1 + 0.15);
+      });
+    } else if (type === 'robot-run') {
+      const notes = [600, 700, 800, 650, 750, 850, 700, 800];
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.08);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.08 + 0.06);
+        osc.start(audioCtx.currentTime + i * 0.08);
+        osc.stop(audioCtx.currentTime + i * 0.08 + 0.06);
+      });
+    }
+  } catch (e) { console.log('Sound not supported'); }
+}
+
+function speakWord(word) {
+  if (window.speechSynthesis === undefined) return;
+  if (soundEnabled === false) return;
+  window.speechSynthesis.cancel();
+  _currentUtterance = new SpeechSynthesisUtterance(word);
+  _currentUtterance.lang = 'en-US';
+  _currentUtterance.rate = 0.85;
+  window.speechSynthesis.speak(_currentUtterance);
+}
+
+function speakTranslation(word) {
+  if (soundEnabled === false) return;
+  const translation = TRANSLATIONS[word];
+  if (!translation) return;
+  let useMyAudio = false;
+  if (AUDIO_WORDS.includes(translation)) {
+    if (translation === 'замок') {
+      if (currentTheme === 'Things' && word === 'lock') { useMyAudio = false; }
+      else { useMyAudio = true; }
+    } else if (translation === 'оранжевый') {
+      if (currentTheme === 'Colors') { useMyAudio = false; }
+      else { useMyAudio = true; }
+    } else { useMyAudio = true; }
+  }
+
+  if (useMyAudio) {
+    const fileName = translation + '.mp3';
+    const audioPath = 'картинки/Аудиозаписи/' + fileName;
+    const audio = new Audio(audioPath);
+    audio.play().catch(() => {
+      if (window.speechSynthesis !== undefined) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(translation);
+        utterance.lang = 'ru-RU';
+        utterance.rate = 0.85;
+        window.speechSynthesis.speak(utterance);
+      }
+    });
+  } else {
+    if (window.speechSynthesis !== undefined) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(translation);
+      utterance.lang = 'ru-RU';
+      utterance.rate = 0.85;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+}
+
+// ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+const phaseStartScore = {};
+let currentTheme = 'Animals';
+let learnedWords = 0;
+let currentPage = 0;
+let currentLearnPage = 0;
+const LEARN_ITEMS_PER_PAGE = 6;
+let gamePhase = 1;
+let gameWords = [];
+let gameIndex = 0;
+let gameScore = 0;
+let isGameOver = false;
+let isAnswering = false;
+let lastCorrectWord = null;
+let timerDuration = 5;
+let timerRemaining = 5;
+let timerInterval = null;
+let timerRunning = false;
+let wordStartTime = 0;
+let maxPossibleScore = 0;
+const WORDS_PER_PHASE = 10;
+const TOTAL_TASKS = 40;
+const WRITING_WORDS_COUNT = 12;
+
+let dragWords = [];
+let dragCurrentBatch = [];
+let dragBatchIndex = 0;
+let dragPlacedCount = 0;
+let dragItemStatus = [];
+let dragItemsData = [];
+
+let chooseWords = [];
+let chooseIndex = 0;
+
+let spellingWords = [];
+let spellingIndex = 0;
+let spellingScore = 0;
+let isSpellingGameOver = false;
+let isSpellingAnswering = false;
+let spellingLastCorrectWord = null;
+
+let dragTimerInterval = null;
+let dragTimerRemaining = 10;
+let dragTimerRunning = false;
+let dragWordStartTime = 0;
+const DRAG_TIMER_DURATION = 10;
+let dragTimerExpired = false;
+
+let currentWord = '';
+let currentSlotIndex = 0;
+let spellingMaxPossibleScore = 0;
+let spellingIntroShown = false;
+let robotRanOnce = false;
+let spellingHadMistakes = false;
+let spellingMistakeCount = 0;
+
+let writingWords = [];
+let writingIndex = 0;
+let writingScore = 0;
+let writingMaxPossibleScore = 0;
+let isWritingGameOver = false;
+let isWritingAnswering = false;
+let writingLastCorrectWord = null;
+let writingCurrentItem = null;
+
+// ==================== DOM ССЫЛКИ ====================
+const chooseOverlay = document.getElementById('chooseOverlay');
+const themeGrid = document.getElementById('themeGrid');
+const pageIndicator = document.getElementById('pageIndicator');
+const prevPageBtn = document.getElementById('prevPage');
+const nextPageBtn = document.getElementById('nextPage');
+const chooseBackBtn = document.getElementById('chooseBackBtn');
+const chooseBtn = document.getElementById('chooseBtn');
+const learnChooseBtn = document.getElementById('learnChooseBtn');
+const startBtn = document.getElementById('startBtn');
+const themeNameDisplay = document.getElementById('themeName');
+const learnOverlay = document.getElementById('learnOverlay');
+const learnGrid = document.getElementById('learnGrid');
+const learnTitle = document.getElementById('learnTitle');
+const learnPageDisplay = document.getElementById('learnPageDisplay');
+const learnPrev = document.getElementById('learnPrev');
+const learnNext = document.getElementById('learnNext');
+const learnPlayBtn = document.getElementById('learnPlayBtn');
+const learnBackBtn = document.getElementById('learnBackBtn');
+const learnSoundBtn = document.getElementById('learnSoundBtn');
+const learnSoundIcon = document.getElementById('learnSoundIcon');
+const gameOverlay = document.getElementById('gameOverlay');
+const gameGrid = document.getElementById('gameGrid');
+const gameWord = document.getElementById('gameWord');
+const gameHint = document.getElementById('gameHint');
+const gameScoreDisplay = document.getElementById('gameScore');
+const gameProgress = document.getElementById('gameProgress');
+const gameProgressText = document.getElementById('gameProgressText');
+const gameBackBtn = document.getElementById('gameBackBtn');
+const gameSoundBtn = document.getElementById('gameSoundBtn');
+const gameSoundIcon = document.getElementById('gameSoundIcon');
+const timerProgress = document.getElementById('timerProgress');
+const timerText = document.getElementById('timerText');
+const CIRCUMFERENCE = 2 * Math.PI * 25;
+const dragOverlay = document.getElementById('dragOverlay');
+const dragScoreDisplay = document.getElementById('dragScore');
+const dragHintText = document.getElementById('dragHintText');
+const dragLeftArea = document.getElementById('dragLeftArea');
+const dragRightArea = document.getElementById('dragRightArea');
+const dragProgress = document.getElementById('dragProgress');
+const dragProgressText = document.getElementById('dragProgressText');
+const dragBackBtn = document.getElementById('dragBackBtn');
+const dragSoundBtn = document.getElementById('dragSoundBtn');
+const dragSoundIcon = document.getElementById('dragSoundIcon');
+const chooseGameOverlay = document.getElementById('chooseGameOverlay');
+const chooseGameScore = document.getElementById('chooseGameScore');
+const chooseGameImg = document.getElementById('chooseGameImg');
+const chooseGameOptions = document.getElementById('chooseGameOptions');
+const chooseGameProgress = document.getElementById('chooseGameProgress');
+const chooseGameProgressText = document.getElementById('chooseGameProgressText');
+const chooseGameBackBtn = document.getElementById('chooseGameBackBtn');
+const chooseGameSoundBtn = document.getElementById('chooseGameSoundBtn');
+const chooseGameSoundIcon = document.getElementById('chooseGameSoundIcon');
+const chooseTimerProgress = document.getElementById('chooseTimerProgress');
+const chooseTimerText = document.getElementById('chooseTimerText');
+const spellingOverlay = document.getElementById('spellingOverlay');
+const spellingScoreDisplay = document.getElementById('spellingScore');
+const spellingWordShow = document.getElementById('spellingWordShow');
+const spellingSlots = document.getElementById('spellingSlots');
+const spellingTrackLettersEl = document.getElementById('spellingTrackLetters');
+const spellingProgress = document.getElementById('spellingProgress');
+const spellingProgressText = document.getElementById('spellingProgressText');
+const spellingRobotRunner = document.getElementById('spellingRobotRunner');
+const spellingBackBtn = document.getElementById('spellingBackBtn');
+const spellingSoundBtn = document.getElementById('spellingSoundBtn');
+const spellingSoundIcon = document.getElementById('spellingSoundIcon');
+const gameoverOverlay = document.getElementById('gameoverOverlay');
+const gameoverImg = document.getElementById('gameoverImg');
+const gameoverWordBelow = document.getElementById('gameoverWordBelow');
+const gameoverRetryBtn = document.getElementById('gameoverRetryBtn');
+const gameoverStopBtn = document.getElementById('gameoverStopBtn');
+const gameoverSoundBtn = document.getElementById('gameoverSoundBtn');
+const gameoverSoundIcon = document.getElementById('gameoverSoundIcon');
+const gameoverArrowBtn = document.getElementById('gameoverArrowBtn');
+const gameoverTranslateBtn = document.getElementById('gameoverTranslateBtn');
+const completeOverlay = document.getElementById('completeOverlay');
+const completeStars = document.getElementById('completeStars');
+const completeScore = document.getElementById('completeScore');
+const completeNewBtn = document.getElementById('completeNewBtn');
+
+let currentWords = [];
+let currentSessionWords = [];
+const SESSION_WORDS_COUNT = 12;
+
+// ==================== РОБОТЫ ====================
+let robots = {};
+function initRobots() {
+  try {
+    robots.menu     = new Robot('menuRobot',       { size: 140 });
+    robots.game     = new Robot('gameRobot',       { size: 120 });
+    robots.drag     = new Robot('dragRobot',       { size: 90  });
+    robots.choose   = new Robot('chooseRobot',     { size: 110 });
+    robots.spelling = new Robot('spellingRobotTop',{ size: 110 });
+    robots.spellingRun = new Robot('spellingRobotRunner', { size: 90 });
+    robots.writing = new Robot('writingRobot', { size: 110 });
+  } catch (e) { console.warn('Robot init failed:', e); }
+}
+
+// ==================== УТИЛИТЫ ====================
+function updateFooter() {
+  themeNameDisplay.textContent = currentTheme;
+  const themeIcon = document.getElementById('themeIcon');
+  if (themeIcon) {
+    const themeData = THEMES_LIST.find(t => t.name === currentTheme);
+    if (themeData && themeData.img) {
+      themeIcon.src = 'картинки/themes/' + themeData.img;
+      themeIcon.alt = currentTheme;
+    }
+  }
+}
+
+function getItemsPerPage() {
+  const w = window.innerWidth;
+  let cols = 4;
+  if (w < 450) cols = 2;
+  else if (w < 650) cols = 3;
+  return cols * 2;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function getGlobalTaskNumber() {
+  let base = 0;
+  if (gamePhase === 1) base = 0;
+  else if (gamePhase === 2) base = WORDS_PER_PHASE;
+  else if (gamePhase === 3) base = WORDS_PER_PHASE * 2;
+  else if (gamePhase === 4) base = WORDS_PER_PHASE * 3;
+  else if (gamePhase === 5) base = 0;
+  let num = base + gameIndex + 1;
+  if (num > TOTAL_TASKS) num = TOTAL_TASKS;
+  return num;
+}
+
+function getStarCount(score, maxScore) {
+  if (maxScore === 0) return 0;
+  const ratio = score / maxScore;
+  if (ratio >= 0.85) return 5;
+  if (ratio >= 0.65) return 4;
+  if (ratio >= 0.45) return 3;
+  if (ratio >= 0.25) return 2;
+  return 1;
+}
+
+function animateRobot(emotion, phase) {
+  if (!robots) return;
+  const target = phase === 1 ? robots.game : phase === 2 ? robots.drag : phase === 3 ? robots.choose : null;
+  if (!target) return;
+  if (emotion === 'happy') target.onCorrect();
+  else if (emotion === 'sad') target.onWrong();
+}
+
+function getScoreForTime() {
+  const elapsed = (Date.now() - wordStartTime) / 1000;
+  if (elapsed <= 2) return 5;
+  if (elapsed <= 4) return 4;
+  if (elapsed <= 5) return 2;
+  return 1;
+}
+const FULL_MAX_SCORE = 4 * WORDS_PER_PHASE * 5;
+
+// ==================== ТАЙМЕРЫ ====================
+function startTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  timerRemaining = timerDuration;
+  timerRunning = true;
+  wordStartTime = Date.now();
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerRemaining -= 0.1;
+    if (timerRemaining <= 0) {
+      timerRemaining = 0;
+      updateTimerDisplay();
+      timerRunning = false;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      if (gamePhase === 1) { gameHint.innerHTML = '<span class="hint-icon icon-time"></span><b>Time is up!</b> Click to get 1 point'; }
+    } else { updateTimerDisplay(); }
+  }, 100);
+}
+
+function updateTimerDisplay() {
+  const seconds = Math.ceil(timerRemaining);
+  let progressEl, textEl;
+  if (gamePhase === 1) { progressEl = timerProgress; textEl = timerText; }
+  else if (gamePhase === 3) { progressEl = chooseTimerProgress; textEl = chooseTimerText; }
+  else { return; }
+  textEl.textContent = seconds;
+  const progress = timerRemaining / timerDuration;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  progressEl.style.strokeDasharray = CIRCUMFERENCE;
+  progressEl.style.strokeDashoffset = offset;
+  progressEl.classList.remove('warning', 'danger');
+  if (progress < 0.25) progressEl.classList.add('danger');
+  else if (progress < 0.5) progressEl.classList.add('warning');
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  timerRunning = false;
+}
+
+function startDragTimer() {
+  if (dragTimerInterval) { clearInterval(dragTimerInterval); dragTimerInterval = null; }
+  dragTimerRemaining = DRAG_TIMER_DURATION;
+  dragTimerRunning = true;
+  dragTimerExpired = false;
+  dragWordStartTime = Date.now();
+  updateDragTimerDisplay();
+  dragTimerInterval = setInterval(() => {
+    dragTimerRemaining -= 0.1;
+    if (dragTimerRemaining <= 0) {
+      dragTimerRemaining = 0;
+      updateDragTimerDisplay();
+      dragTimerRunning = false;
+      dragTimerExpired = true;
+      clearInterval(dragTimerInterval);
+      dragTimerInterval = null;
+    } else {
+      updateDragTimerDisplay();
+    }
+  }, 100);
+}
+
+function updateDragTimerDisplay() {
+  const progressEl = document.getElementById('dragTimerProgress');
+  const textEl = document.getElementById('dragTimerText');
+  if (!progressEl || !textEl) return;
+  const seconds = Math.ceil(dragTimerRemaining);
+  textEl.textContent = seconds;
+  const progress = dragTimerRemaining / DRAG_TIMER_DURATION;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  progressEl.style.strokeDasharray = CIRCUMFERENCE;
+  progressEl.style.strokeDashoffset = offset;
+  progressEl.classList.remove('warning', 'danger');
+  if (progress < 0.25) progressEl.classList.add('danger');
+  else if (progress < 0.5) progressEl.classList.add('warning');
+}
+
+function stopDragTimer() {
+  if (dragTimerInterval) { clearInterval(dragTimerInterval); dragTimerInterval = null; }
+  dragTimerRunning = false;
+}
+
+function getDragScoreForTime() {
+  if (dragTimerExpired) return 2;
+  const elapsed = (Date.now() - dragWordStartTime) / 1000;
+  if (elapsed <= 3) return 5;
+  if (elapsed <= 6) return 4;
+  if (elapsed <= 9) return 3;
+  return 2;
+}
+
+// ==================== ВЫБОР И ИЗУЧЕНИЕ ТЕМ ====================
+function renderThemePage() {
+  const itemsPerPage = getItemsPerPage();
+  const totalPages = Math.ceil(THEMES_LIST.length / itemsPerPage);
+  if (currentPage >= totalPages) currentPage = totalPages - 1;
+  if (currentPage < 0) currentPage = 0;
+  const start = currentPage * itemsPerPage;
+  const end = Math.min(start + itemsPerPage, THEMES_LIST.length);
+  const pageThemes = THEMES_LIST.slice(start, end);
+  themeGrid.innerHTML = '';
+  pageThemes.forEach(({ name, img }) => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (name === currentTheme ? ' active' : '');
+    card.innerHTML = '<img src="картинки/themes/' + img + '" alt="' + name + '" loading="lazy"><div class="name">' + name + '</div>' + (name === currentTheme ? '<span class="theme-check-icon"></span>' : '');
+    card.addEventListener('click', function() {
+      currentTheme = name;
+      chooseOverlay.classList.remove('active');
+      openLearn(name);
+    });
+    themeGrid.appendChild(card);
+  });
+  pageIndicator.textContent = currentPage + 1 + ' / ' + totalPages;
+  prevPageBtn.disabled = (currentPage === 0);
+  nextPageBtn.disabled = (currentPage >= totalPages - 1);
+}
+
+function openLearn(theme) {
+  if (!WORDS_BY_THEME[theme] || WORDS_BY_THEME[theme].length === 0) {
+    theme = 'Animals';
+    currentTheme = 'Animals';
+    themeNameDisplay.textContent = 'Animals';
+  }
+  currentTheme = theme;
+  currentLearnPage = 0;
+  currentWords = WORDS_BY_THEME[theme] || WORDS_BY_THEME['Animals'];
+  const pool = [...currentWords];
+  const selectedCount = Math.min(SESSION_WORDS_COUNT, pool.length);
+    currentSessionWords = aiPickAdaptiveWords(theme, pool, selectedCount);
+  learnTitle.textContent = theme;
+  learnOverlay.classList.add('active');
+  renderLearnPage();
+}
+
+function renderLearnPage() {
+  const wordsToShow = currentSessionWords.length > 0 ? currentSessionWords : currentWords;
+  const totalPages = Math.ceil(wordsToShow.length / LEARN_ITEMS_PER_PAGE);
+  if (currentLearnPage >= totalPages) currentLearnPage = totalPages - 1;
+  if (currentLearnPage < 0) currentLearnPage = 0;
+  const start = currentLearnPage * LEARN_ITEMS_PER_PAGE;
+  const end = Math.min(start + LEARN_ITEMS_PER_PAGE, wordsToShow.length);
+  const pageWords = wordsToShow.slice(start, end);
+  learnGrid.innerHTML = '';
+  if (pageWords.length === 0) {
+    learnGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999; font-size: 18px;">No words yet for this theme<br>Add pictures to the folder</div>';
+    learnPageDisplay.textContent = '0 / 0';
+    learnPrev.disabled = true;
+    learnNext.disabled = true;
+    return;
+  }
+  pageWords.forEach(({ word, img }) => {
+    const card = document.createElement('div');
+    card.className = 'learn-card';
+    const transId = 'trans-' + word.replace(/\s/g, '_');
+    card.innerHTML = `
+      <button class="translate-btn" data-word="${word}" title="Перевод на русский">
+        <img src="картинки/ui/translate.png" alt="Translate">
+      </button>
+      <img src="картинки/${currentTheme}/${img}" alt="${word}" loading="lazy">
+      <div class="name">${word}</div>
+      <div class="translation" id="${transId}">${TRANSLATIONS[word] || ''}</div>
+    `;
+    card.querySelector('.translate-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const w = this.dataset.word;
+      const transEl = card.querySelector('.translation');
+      transEl.classList.add('show');
+      speakTranslation(w);
+      clearTimeout(transEl._timeout);
+      transEl._timeout = setTimeout(() => { transEl.classList.remove('show'); }, 5000);
+    });
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.learn-card').forEach(c => c.classList.remove('listening'));
+      card.classList.add('listening');
+      speakWord(word);
+      setTimeout(() => { card.classList.remove('listening'); }, 800);
+    });
+    learnGrid.appendChild(card);
+  });
+  learnPageDisplay.textContent = (wordsToShow.length > 0 ? currentLearnPage + 1 + ' / ' + totalPages : '0 / 0');
+  learnPrev.disabled = (currentLearnPage === 0 || wordsToShow.length === 0);
+  learnNext.disabled = (currentLearnPage >= totalPages - 1 || wordsToShow.length === 0);
+}
+
+// ==================== ОКОНЧАНИЕ ИГРЫ И ПОБЕДА ====================
+function showGameOver(correctWord) {
+  isGameOver = true;
+  stopTimer();
+  stopDragTimer();
+  gameOverlay.classList.remove('active');
+  dragOverlay.classList.remove('active');
+  chooseGameOverlay.classList.remove('active');
+  spellingOverlay.classList.remove('active');
+  const wo = document.getElementById('writingOverlay');
+  if (wo) wo.classList.remove('active');
+  const wordData = currentSessionWords.find(w => w.word === correctWord)
+                || currentWords.find(w => w.word === correctWord)
+                || currentWords[0];
+  lastCorrectWord = wordData;
+  gameoverImg.src = 'картинки/' + currentTheme + '/' + wordData.img;
+  gameoverImg.alt = wordData.word;
+  gameoverWordBelow.textContent = wordData.word;
+  gameoverOverlay.classList.add('active');
+}
+
+function showGameComplete() {
+  if (typeof aiSaveGameResult === 'function') aiSaveGameResult(gameScore, FULL_MAX_SCORE, currentTheme);
+  gameOverlay.classList.remove('active');
+  dragOverlay.classList.remove('active');
+  chooseGameOverlay.classList.remove('active');
+  spellingOverlay.classList.remove('active');
+  const wo = document.getElementById('writingOverlay');
+  if (wo) wo.classList.remove('active');
+  if (robots.menu) robots.menu.onComplete();
+  if (robots.game) robots.game.onComplete();
+  if (robots.drag) robots.drag.onComplete();
+  if (robots.choose) robots.choose.onComplete();
+  if (robots.spelling) robots.spelling.onComplete();
+  if (robots.writing) robots.writing.onComplete();
+  const starCount = getStarCount(gameScore, FULL_MAX_SCORE);
+  completeStars.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const img = document.createElement('img');
+    img.src = 'картинки/ui/star_menu.png';
+    img.alt = i < starCount ? 'star' : 'empty star';
+    if (i >= starCount) img.classList.add('gray-star');
+    completeStars.appendChild(img);
+  }
+  completeScore.textContent = gameScore;
+  completeOverlay.classList.add('active');
+}
+
+// ==================== ИГРА 1: CLICK ====================
+function startClickGame(isRetry) {
+if (isRetry) gameScore = 0;
+gameIndex = 0;
+const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
+gameWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
+isGameOver = false;
+isAnswering = false;
+lastCorrectWord = null;
+maxPossibleScore = gameWords.length * 5;
+gamePhase = 1;
+gameoverOverlay.classList.remove('active');
+completeOverlay.classList.remove('active');
+learnOverlay.classList.remove('active');
+dragOverlay.classList.remove('active');
+chooseGameOverlay.classList.remove('active');
+spellingOverlay.classList.remove('active');
+const wo = document.getElementById('writingOverlay');
+if (wo) wo.classList.remove('active');
+gameOverlay.classList.add('active');
+gameScoreDisplay.textContent = '0';
+gameProgressText.textContent = '1 / ' + TOTAL_TASKS;
+showClickWord();
+}
+function showClickWord() {
+if (isGameOver) return;
+if (gameIndex >= gameWords.length) { gamePhase = 2; startDragGame(); return; }
+const item = gameWords[gameIndex];
+gameWord.textContent = item.word;
+gameHint.textContent = 'Choose the correct picture';
+animateRobot('neutral', 1);
+setTimeout(() => { speakWord(item.word); }, 300);
+if (robots.game) {
+  const roll = Math.random();
+  if (roll < 0.5) robots.game.onThinking();
+  else robots.game.onWaiting();
+}
+let options = [item];
+const usedWords = new Set([item.word]);
+const others = gameWords.filter((_, i) => i !== gameIndex);
+const shuffledOthers = shuffle([...others]);
+for (let i = 0; i < shuffledOthers.length && options.length < 6; i++) {
+if (usedWords.has(shuffledOthers[i].word) === false) {
+options.push(shuffledOthers[i]);
+usedWords.add(shuffledOthers[i].word);
+}
+}
+let fallbackIndex = 0;
+while (options.length < 6) {
+const fallback = WORDS_BY_THEME['Animals'];
+if (fallbackIndex >= fallback.length) break;
+if (usedWords.has(fallback[fallbackIndex].word) === false) {
+options.push(fallback[fallbackIndex]);
+usedWords.add(fallback[fallbackIndex].word);
+}
+fallbackIndex++;
+}
+const shuffledOptions = shuffle([...options]);
+gameGrid.innerHTML = '';
+shuffledOptions.forEach(opt => {
+const card = document.createElement('div');
+card.className = 'game-card';
+card.dataset.word = opt.word;
+card.innerHTML = '<img src="картинки/' + currentTheme + '/' + opt.img + '" alt="' + opt.word + '" loading="lazy">';
+card.addEventListener('click', () => handleClickGame(card, opt.word, item.word));
+gameGrid.appendChild(card);
+});
+updateClickUI();
+isAnswering = false;
+startTimer();
+}
+function handleClickGame(card, selected, correct) {
+if (isAnswering || isGameOver) return;
+if (card.classList.contains('correct') || card.classList.contains('wrong')) return;
+isAnswering = true;
+stopTimer();
+const elapsed = (Date.now() - wordStartTime) / 1000;
+const isCorrect = (selected === correct);
+aiUpdateWeight(currentTheme, correct, isCorrect ? 'correct' : 'wrong', elapsed);
+if (isCorrect) {
+const points = getScoreForTime();
+gameScore += points;
+gameHint.innerHTML = '<span class="hint-icon icon-check"></span><b>Correct!</b> +' + points + ' pts';
+const reaction = Math.random();
+if (reaction < 0.4) { animateRobot('happy', 1); }
+else if (reaction < 0.7) { if (robots.game) robots.game.onWink(); }
+else { animateRobot('happy', 1); setTimeout(() => { if (robots.game) robots.game.onEncourage(); }, 2400); }
+playSound('correct');
+speakPraise(elapsed);
+card.classList.add('correct');
+document.querySelectorAll('.game-card').forEach(c => c.style.pointerEvents = 'none');
+const isLastWord = (gameIndex + 1 >= gameWords.length);
+const delay = isLastWord ? 2200 : 700;
+setTimeout(() => {
+gameIndex++;
+document.querySelectorAll('.game-card').forEach(c => c.style.pointerEvents = '');
+showClickWord();
+}, delay);
+} else {
+card.classList.add('wrong');
+gameHint.innerHTML = '<span class="hint-icon icon-cross"></span><b>Wrong!</b>';
+animateRobot('sad', 1);
+playSound('wrong');
+document.querySelectorAll('.game-card').forEach(c => {
+    if (c.dataset.word === correct) c.classList.add('correct');
+    c.style.pointerEvents = 'none';
+});
+setTimeout(() => { showGameOver(correct); }, 800);
+}
+updateClickUI();
+}
+
+function updateClickUI() {
+gameScoreDisplay.textContent = gameScore;
+const globalDone = getGlobalTaskNumber() - 1;
+const pct = (globalDone / TOTAL_TASKS) * 100;
+gameProgress.style.width = pct + '%';
+const globalTaskNumber = getGlobalTaskNumber();
+gameProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+}
+
+// ==================== ИГРА 2: DRAG ====================
+function startDragGame(isRetry) {
+if (isRetry) gameScore = phaseStartScore[2] || 0; else phaseStartScore[2] = gameScore;
+const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
+dragWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
+dragBatchIndex = 0;
+dragPlacedCount = 0;
+gamePhase = 2;
+dragTimerExpired = false;
+gameIndex = 0;
+isGameOver = false;
+gameoverOverlay.classList.remove('active');
+completeOverlay.classList.remove('active');
+learnOverlay.classList.remove('active');
+gameOverlay.classList.remove('active');
+chooseGameOverlay.classList.remove('active');
+spellingOverlay.classList.remove('active');
+const wo = document.getElementById('writingOverlay');
+if (wo) wo.classList.remove('active');
+dragOverlay.classList.add('active');
+dragScoreDisplay.textContent = gameScore;
+const globalTaskNumber = getGlobalTaskNumber();
+dragProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+renderDragBatch();
+}
+function renderDragBatch() {
+if (isGameOver) return;
+if (dragPlacedCount >= WORDS_PER_PHASE) { gamePhase = 3; startChooseGame(); return; }
+const globalTaskNumber = getGlobalTaskNumber();
+dragProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+dragScoreDisplay.textContent = gameScore;
+const startIdx = dragBatchIndex;
+const batchSize = Math.min(6, dragWords.length - startIdx);
+if (batchSize <= 0) { gamePhase = 3; startChooseGame(); return; }
+const batch = dragWords.slice(startIdx, startIdx + batchSize);
+dragCurrentBatch = batch;
+dragItemsData = batch.map(item => ({ ...item, placed: false }));
+dragItemStatus = batch.map(() => false);
+dragLeftArea.innerHTML = '';
+dragRightArea.innerHTML = '';
+const shuffledForLeft = shuffle([...batch]);
+const rightSideItems = shuffle([...batch]);
+shuffledForLeft.forEach((item, idx) => {
+const imageItem = document.createElement('div');
+imageItem.className = 'drag-image-item';
+if (idx >= 3) imageItem.classList.add('drag-item-shift');
+imageItem.draggable = true;
+imageItem.dataset.word = item.word;
+imageItem.dataset.img = item.img;
+imageItem.dataset.idx = idx;
+imageItem.id = 'drag-img-' + idx;
+const img = document.createElement('img');
+img.src = 'картинки/' + currentTheme + '/' + item.img;
+img.alt = item.word;
+img.draggable = false;
+imageItem.appendChild(img);
+dragLeftArea.appendChild(imageItem);
+imageItem.addEventListener('dragstart', function(e) {
+if (isGameOver || this.classList.contains('placed')) { e.preventDefault(); return; }
+this.classList.add('dragging');
+e.dataTransfer.effectAllowed = 'copy';
+e.dataTransfer.setData('text/plain', this.dataset.word);
+e.dataTransfer.setData('source-idx', this.dataset.idx);
+gameIndex = dragPlacedCount + startIdx + idx;
+});
+imageItem.addEventListener('dragend', function(e) { this.classList.remove('dragging'); });
+});
+rightSideItems.forEach((item, idx) => {
+const dropItem = document.createElement('div');
+dropItem.className = 'drag-drop-item';
+if (idx >= 3) dropItem.classList.add('drag-item-shift');
+dropItem.dataset.word = item.word;
+dropItem.dataset.idx = idx;
+dropItem.id = 'drop-zone-' + idx;
+dropItem.innerHTML = '<span class="drop-hint">📥</span>';
+const wordLabel = document.createElement('span');
+wordLabel.className = 'word-label';
+wordLabel.textContent = item.word;
+dropItem.appendChild(wordLabel);
+dragRightArea.appendChild(dropItem);
+dropItem.addEventListener('dragover', function(e) {
+e.preventDefault();
+e.dataTransfer.dropEffect = 'copy';
+if (isGameOver === false && this.classList.contains('filled') === false) this.classList.add('drag-over');
+});
+dropItem.addEventListener('dragleave', function(e) { this.classList.remove('drag-over'); });
+dropItem.addEventListener('drop', function(e) {
+e.preventDefault();
+this.classList.remove('drag-over');
+if (isGameOver || this.classList.contains('filled')) return;
+const draggedWord = e.dataTransfer.getData('text/plain');
+const sourceIdx = e.dataTransfer.getData('source-idx');
+const targetWord = this.dataset.word;
+let draggedElement = null;
+const allImages = dragLeftArea.querySelectorAll('.drag-image-item');
+allImages.forEach(el => {
+if (el.dataset.idx == sourceIdx && el.classList.contains('placed') === false) {
+draggedElement = el;
+}
+});
+if (draggedElement === null) { dragHintText.innerHTML = '<span class="hint-icon icon-warning"></span><b>Already placed!</b>'; return; }
+const isCorrect = (draggedWord === targetWord);
+const hasShift = dropItem.classList.contains('drag-item-shift');
+handleDragDropResult(draggedElement, dropItem, sourceIdx, isCorrect, hasShift);
+});
+});
+dragHintText.innerHTML = '<span class="hint-icon icon-drag"></span><b>Drag</b> the picture to the correct word';
+startDragTimer();
+}
+
+function handleDragDropResult(draggedElement, dropZone, draggedIdx, isCorrect, hasShift) {
+if (isGameOver) return;
+stopDragTimer();
+const elapsed = (Date.now() - dragWordStartTime) / 1000;
+aiUpdateWeight(currentTheme, dropZone.dataset.word, isCorrect ? 'correct' : 'wrong', elapsed);
+if (isCorrect) {
+let points = getDragScoreForTime();
+gameScore += points;
+dragHintText.innerHTML = '<span class="hint-icon icon-check"></span><b>Correct!</b> +' + points + ' pts';
+animateRobot('happy', 2);
+playSound('correct');
+draggedElement.classList.add('placed', 'correct');
+let shiftClass = '';
+if (hasShift) shiftClass = ' drag-item-shift';
+dropZone.className = 'drag-drop-item correct filled' + shiftClass;
+const imgSrc = draggedElement.querySelector('img').src;
+dropZone.innerHTML = '<img src="' + imgSrc + '" alt="' + draggedElement.dataset.word + '">';
+const wordLabel = document.createElement('span');
+wordLabel.className = 'word-label';
+wordLabel.textContent = draggedElement.dataset.word;
+dropZone.appendChild(wordLabel);
+dragItemStatus[draggedIdx] = true;
+// Сначала слово, потом похвала — чтобы speakPraise дождался окончания слова
+speakWord(draggedElement.dataset.word);
+speakPraise(elapsed);
+dragPlacedCount++;
+gameIndex = dragPlacedCount - 1;
+const globalTaskNumber = getGlobalTaskNumber();
+dragProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+dragScoreDisplay.textContent = gameScore;
+
+const globalDone = getGlobalTaskNumber() - 1;
+const dragProgressPct = (globalDone / TOTAL_TASKS) * 100;
+dragProgress.style.width = dragProgressPct + '%';
+const isLastBatch = (dragPlacedCount >= WORDS_PER_PHASE - 1);
+const delay = isLastBatch ? 2200 : 800;
+setTimeout(() => {
+    const allFilled = dragItemStatus.every(s => s === true);
+    if (allFilled) {
+        dragBatchIndex += dragCurrentBatch.length;
+        renderDragBatch();
+    } else {
+        dragHintText.innerHTML = '<span class="hint-icon icon-drag"></span><b>Drag</b> the picture to the correct word';
+        startDragTimer();
+    }
+}, delay);
+    } else {
+        dragHintText.innerHTML = '<span class="hint-icon icon-cross"></span><b>Wrong!</b>';
+        animateRobot('sad', 2);
+        playSound('wrong');
+        dropZone.className = 'drag-drop-item wrong';
+        setTimeout(() => {
+            // ВОТ ЭТА СТРОКА (стало):
+            const correctWord = draggedElement.dataset.word; 
+            showGameOver(correctWord);
+        }, 800);
+    }
+}
+
+// ==================== ИГРА 3: CHOOSE ====================
+function startChooseGame(isRetry) {
+if (isRetry) gameScore = phaseStartScore[3] || 0; else phaseStartScore[3] = gameScore;
+const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
+chooseWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
+chooseIndex = 0;
+gamePhase = 3;
+gameIndex = 0;
+isGameOver = false;
+gameoverOverlay.classList.remove('active');
+completeOverlay.classList.remove('active');
+learnOverlay.classList.remove('active');
+gameOverlay.classList.remove('active');
+dragOverlay.classList.remove('active');
+spellingOverlay.classList.remove('active');
+const wo = document.getElementById('writingOverlay');
+if (wo) wo.classList.remove('active');
+chooseGameOverlay.classList.add('active');
+chooseGameScore.textContent = gameScore;
+const globalTaskNumber = getGlobalTaskNumber();
+chooseGameProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+showChooseWord();
+}
+function showChooseWord() {
+if (isGameOver) return;
+if (chooseIndex >= chooseWords.length) { startSpellingGame(); return; }
+const item = chooseWords[chooseIndex];
+chooseGameImg.src = 'картинки/' + currentTheme + '/' + item.img;
+chooseGameImg.alt = item.word;
+animateRobot('neutral', 3);
+let options = [item.word];
+const usedWords = new Set([item.word]);
+const others = chooseWords.filter((_, i) => i !== chooseIndex);
+const shuffledOthers = shuffle([...others]);
+for (let i = 0; i < shuffledOthers.length && options.length < 4; i++) {
+if (usedWords.has(shuffledOthers[i].word) === false) {
+options.push(shuffledOthers[i].word);
+usedWords.add(shuffledOthers[i].word);
+}
+}
+let fallbackIndex = 0;
+while (options.length < 4) {
+const fallback = WORDS_BY_THEME['Animals'];
+if (fallbackIndex >= fallback.length) break;
+if (usedWords.has(fallback[fallbackIndex].word) === false) {
+options.push(fallback[fallbackIndex].word);
+usedWords.add(fallback[fallbackIndex].word);
+}
+fallbackIndex++;
+}
+const shuffledOptions = shuffle([...options]);
+chooseGameOptions.innerHTML = '';
+shuffledOptions.forEach(optWord => {
+const option = document.createElement('div');
+option.className = 'choose-game-option';
+option.textContent = optWord;
+option.addEventListener('click', () => handleChooseGameClick(option, optWord, item.word));
+chooseGameOptions.appendChild(option);
+});
+isAnswering = false;
+startTimer();
+}
+
+function handleChooseGameClick(option, selected, correct) {
+if (isAnswering || isGameOver) return;
+if (option.classList.contains('correct') || option.classList.contains('wrong')) return;
+isAnswering = true;
+stopTimer();
+const elapsed = (Date.now() - wordStartTime) / 1000;
+const isCorrect = (selected === correct);
+aiUpdateWeight(currentTheme, correct, isCorrect ? 'correct' : 'wrong', elapsed);
+
+if (isCorrect) {
+const points = getScoreForTime();
+gameScore += points;
+animateRobot('happy', 3);
+playSound('correct');
+option.classList.add('correct');
+chooseGameProgressText.innerHTML = '<span class="hint-icon icon-check"></span><b>Correct!</b> +' + points + ' pts';
+document.querySelectorAll('.choose-game-option').forEach(o => o.classList.add('disabled'));
+// Сначала слово, потом похвала — чтобы speakPraise дождался окончания слова
+speakWord(correct);
+speakPraise(elapsed);
+const isLastWord = (chooseIndex + 1 >= chooseWords.length);
+const delay = isLastWord ? 2200 : 700;
+setTimeout(() => {
+chooseIndex++;
+gameIndex = chooseIndex - 1;
+document.querySelectorAll('.choose-game-option').forEach(o => o.classList.remove('disabled'));
+showChooseWord();
+updateChooseUI();
+}, delay);
+} else {
+option.classList.add('wrong');
+animateRobot('sad', 3);
+playSound('wrong');
+chooseGameProgressText.innerHTML = '<span class="hint-icon icon-cross"></span><b>Wrong!</b>';
+document.querySelectorAll('.choose-game-option').forEach(o => {
+if (o.textContent === correct) o.classList.add('correct');
+o.classList.add('disabled');
+});
+setTimeout(() => { showGameOver(correct); }, 800);
+}
+}
+
+function updateChooseUI() {
+    chooseGameScore.textContent = gameScore;
+    const globalDone = getGlobalTaskNumber() - 1;
+    const pct = (globalDone / TOTAL_TASKS) * 100;
+    chooseGameProgress.style.width = pct + '%';
+    const globalTaskNumber = getGlobalTaskNumber();
+    chooseGameProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+}
+
+// ==================== ИГРА 4: SPELLING ====================
+function animateSpellingRobot(emotion) {
+if (!robots || !robots.spelling) return;
+if (emotion === 'happy') robots.spelling.onCorrect();
+else if (emotion === 'sad') robots.spelling.onWrong();
+}
+function runSpellingRobot() {
+if (!spellingRobotRunner) return;
+const track = document.getElementById('spellingTrack');
+if (!track) return;
+const trackWidth = track.offsetWidth;
+playSound('robot-run');
+spellingRobotRunner.style.transition = 'none';
+spellingRobotRunner.style.left = '-110px';
+setTimeout(() => {
+spellingRobotRunner.style.transition = 'left 2.2s ease-in-out';
+spellingRobotRunner.style.left = (trackWidth - 100) + 'px';
+}, 50);
+setTimeout(() => {
+spellingRobotRunner.style.transition = 'left 1.8s ease-in-out';
+spellingRobotRunner.style.left = '-110px';
+}, 2400);
+}
+function startSpellingGame() {
+const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
+spellingWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
+spellingIndex = 0;
+spellingScore = 0;
+gamePhase = 4;
+gameIndex = 0;
+isSpellingGameOver = false;
+isSpellingAnswering = false;
+spellingLastCorrectWord = null;
+spellingMaxPossibleScore = spellingWords.length * 5;
+spellingIntroShown = false;
+robotRanOnce = false;
+gameoverOverlay.classList.remove('active');
+completeOverlay.classList.remove('active');
+learnOverlay.classList.remove('active');
+gameOverlay.classList.remove('active');
+dragOverlay.classList.remove('active');
+chooseGameOverlay.classList.remove('active');
+spellingOverlay.classList.add('active');
+spellingScoreDisplay.textContent = gameScore;
+const globalTaskNumber = getGlobalTaskNumber();
+spellingProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+showSpellingIntro();
+}
+
+function showSpellingIntro() {
+if (isSpellingGameOver) return;
+if (spellingIndex >= spellingWords.length) { showSpellingComplete(); return; }
+const globalTaskNumber = getGlobalTaskNumber();
+spellingProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+const item = spellingWords[spellingIndex];
+currentWord = item.word;
+currentSlotIndex = 0;
+spellingIntroShown = false;
+robotRanOnce = false;
+spellingHadMistakes = false;
+spellingMistakeCount = 0;
+spellingWordShow.textContent = currentWord;
+spellingWordShow.classList.remove('hidden');
+setTimeout(() => { speakWord(currentWord); }, 300);
+const srt = document.getElementById('spellingRobotTop');
+if (srt) srt.style.display = 'none';
+spellingRobotRunner.style.transition = 'none';
+spellingRobotRunner.style.left = '-110px';
+spellingSlots.innerHTML = '';
+const letters = currentWord.split('');
+letters.forEach((letter, idx) => {
+const slot = document.createElement('div');
+slot.className = 'spelling-slot empty';
+slot.dataset.idx = idx;
+slot.textContent = '';
+spellingSlots.appendChild(slot);
+});
+spellingTrackLettersEl.innerHTML = '';
+letters.forEach((letter, idx) => {
+const letterEl = document.createElement('div');
+letterEl.className = 'spelling-track-letter';
+letterEl.textContent = letter;
+letterEl.dataset.idx = idx;
+letterEl.dataset.letter = letter;
+letterEl.style.pointerEvents = 'none';
+spellingTrackLettersEl.appendChild(letterEl);
+});
+setTimeout(() => { runSpellingRobot(); }, 600);
+setTimeout(() => {
+ window.spellingStartTime = Date.now(); 
+spellingWordShow.classList.add('hidden');
+spellingIntroShown = true;
+let shuffledLetters;
+let attempts = 0;
+do {
+shuffledLetters = shuffle([...letters]);
+attempts++;
+const isSameOrder = shuffledLetters.every((letter, idx) => letter === letters[idx]);
+if (isSameOrder === false) break;
+if (attempts > 10) break;
+} while (true);
+spellingTrackLettersEl.innerHTML = '';
+shuffledLetters.forEach((letter, idx) => {
+const letterEl = document.createElement('div');
+letterEl.className = 'spelling-track-letter';
+letterEl.textContent = letter;
+letterEl.dataset.idx = idx;
+letterEl.dataset.letter = letter;
+letterEl.style.pointerEvents = 'auto';
+letterEl.addEventListener('click', () => handleSpellingLetterClick(letterEl, letter));
+spellingTrackLettersEl.appendChild(letterEl);
+});
+const firstSlot = spellingSlots.querySelector('.spelling-slot');
+if (firstSlot) {
+firstSlot.classList.remove('empty');
+firstSlot.classList.add('highlight');
+}
+if (srt) srt.style.display = 'flex';
+if (robots.spelling) robots.spelling.onWaiting();
+isSpellingAnswering = false;
+updateSpellingUI();
+}, 4500);
+}
+
+function handleSpellingLetterClick(letterEl, letter) {
+if (isSpellingAnswering || isSpellingGameOver || spellingIntroShown === false) return;
+if (letterEl.classList.contains('hit') || letterEl.classList.contains('wrong-hit')) return;
+const slots = spellingSlots.querySelectorAll('.spelling-slot');
+if (currentSlotIndex >= slots.length) return;
+isSpellingAnswering = true;
+const expectedLetter = currentWord[currentSlotIndex];
+const isCorrect = (letter === expectedLetter);
+if (isCorrect) {
+letterEl.classList.add('hit');
+animateSpellingRobot('happy');
+playSound('correct');
+const slot = slots[currentSlotIndex];
+slot.textContent = letter;
+slot.classList.remove('empty', 'highlight');
+slot.classList.add('filled');
+currentSlotIndex++;
+if (currentSlotIndex < slots.length) {
+const nextSlot = slots[currentSlotIndex];
+nextSlot.classList.remove('empty');
+nextSlot.classList.add('highlight');
+if (soundEnabled) speakWord(letter);
+}
+
+if (currentSlotIndex === slots.length) {
+    let aiResult;
+    if (spellingMistakeCount === 0) aiResult = 'correct';
+    else if (spellingMistakeCount === 1) aiResult = 'almost';
+    else aiResult = 'wrong';
+    const elapsedSpelling = window.spellingStartTime ? (Date.now() - window.spellingStartTime) / 1000 : 3;
+aiUpdateWeight(currentTheme, currentWord, aiResult, elapsedSpelling);
+
+    let points = 5;
+    if (spellingMistakeCount === 1) points = 3;
+    else if (spellingMistakeCount === 2) points = 1;
+    else if (spellingMistakeCount >= 3) points = 0;
+    gameScore += points;
+    spellingScore = gameScore;
+    playSound('win');
+    spellingScoreDisplay.textContent = gameScore;
+
+    spellingProgressText.innerHTML = '<span class="hint-icon icon-check"></span><b>Correct!</b> +' + points + ' pts';
+
+    // Похвала зависит от количества ошибок:
+    //   0 ошибок  -> «Excellent!»
+    //   1 ошибка  -> «Great!»
+    //   2 ошибки  -> «Not bad!»
+    //   3+ ошибок -> без похвалы (просто собрал перебором)
+    if (spellingMistakeCount === 0) {
+    speakPraise(2);
+} else if (spellingMistakeCount === 1) {
+    speakPraise(3);
+} else if (spellingMistakeCount === 2) {
+    speakPraise(5);
+}
+
+    setTimeout(() => {
+        spellingIndex++;
+        gameIndex = spellingIndex - 1;
+        spellingIntroShown = false;
+        robotRanOnce = false;
+        spellingHadMistakes = false;
+        spellingMistakeCount = 0;
+        isSpellingAnswering = false;
+        showSpellingIntro();
+    }, 1000);
+}
+else {
+setTimeout(() => { isSpellingAnswering = false; }, 300);
+}
+} else {
+letterEl.classList.add('wrong-hit');
+spellingHadMistakes = true;
+spellingMistakeCount++;
+animateSpellingRobot('sad');
+playSound('wrong');
+const slot = slots[currentSlotIndex];
+slot.classList.remove('empty', 'highlight');
+slot.classList.add('wrong');
+setTimeout(() => {
+slot.classList.remove('wrong');
+slot.classList.add('empty', 'highlight');
+letterEl.classList.remove('wrong-hit');
+isSpellingAnswering = false;
+}, 800);
+}
+}
+
+
+
+
+function updateSpellingUI() {
+spellingScoreDisplay.textContent = gameScore;
+const total = spellingWords.length;
+const done = Math.min(spellingIndex, total);
+const pct = total > 0 ? (done / total) * 100 : 0;
+spellingProgress.style.width = pct + '%';
+const globalTaskNumber = getGlobalTaskNumber();
+spellingProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+}
+function showSpellingComplete() {
+    if (typeof aiSaveGameResult === 'function') aiSaveGameResult(gameScore, FULL_MAX_SCORE, currentTheme);
+isSpellingGameOver = true;
+spellingOverlay.classList.remove('active');
+if (robots.menu) robots.menu.onComplete();
+if (robots.game) robots.game.onComplete();
+if (robots.drag) robots.drag.onComplete();
+if (robots.choose) robots.choose.onComplete();
+if (robots.spelling) robots.spelling.onComplete();
+if (robots.writing) robots.writing.onComplete();
+const starCount = getStarCount(gameScore, FULL_MAX_SCORE);
+completeStars.innerHTML = '';
+for (let i = 0; i < 5; i++) {
+const img = document.createElement('img');
+img.src = 'картинки/ui/star_menu.png';
+img.alt = i < starCount ? 'star' : 'empty star';
+if (i >= starCount) img.classList.add('gray-star');
+completeStars.appendChild(img);
+}
+completeScore.textContent = gameScore;
+completeOverlay.classList.add('active');
+}
+
+
+
+// ==================== ИГРА 5: WRITING ====================
+function animateWritingRobot(emotion) {
+    if (!robots || !robots.writing) return;
+    if (emotion === 'happy') robots.writing.onCorrect();
+    else if (emotion === 'sad') robots.writing.onWrong();
+}
+function startWritingGame() {
+    const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
+    writingWords = aiPickAdaptiveWords(currentTheme, words, WRITING_WORDS_COUNT);
+    writingIndex = 0;
+    writingScore = 0;
+    gameScore = 0;
+    gamePhase = 5;
+    gameIndex = 0;
+    isWritingGameOver = false;
+    isWritingAnswering = false;
+    writingLastCorrectWord = null;
+    writingMaxPossibleScore = writingWords.length * 5;
+    gameoverOverlay.classList.remove('active');
+    completeOverlay.classList.remove('active');
+    learnOverlay.classList.remove('active');
+    gameOverlay.classList.remove('active');
+    dragOverlay.classList.remove('active');
+    chooseGameOverlay.classList.remove('active');
+    spellingOverlay.classList.remove('active');
+    const wo = document.getElementById('writingOverlay');
+    if (wo) wo.classList.add('active');
+    const wsd = document.getElementById('writingScore');
+    if (wsd) wsd.textContent = gameScore;
+    const wpt = document.getElementById('writingProgressText');
+    if (wpt) wpt.textContent = '1 / ' + writingWords.length;
+    showWritingWord();
+}
+function showWritingWord() {
+    if (isWritingGameOver) return;
+    if (writingIndex >= writingWords.length) { showWritingComplete(); return; }
+    const item = writingWords[writingIndex];
+    writingCurrentItem = item;
+    const wImg = document.getElementById('writingImage');
+    const wInput = document.getElementById('writingInput');
+    const wFb = document.getElementById('writingFeedback');
+    const wHint = document.getElementById('writingHintText');
+    const wSub = document.getElementById('writingSubmitBtn');
+    if (wImg) { wImg.src = 'картинки/' + currentTheme + '/' + item.img; wImg.alt = item.word; }
+    if (wInput) { wInput.value = ''; wInput.className = 'writing-input'; wInput.disabled = false; wInput.focus(); }
+    if (wFb) { wFb.textContent = ''; wFb.className = 'writing-feedback'; }
+    if (wHint) wHint.innerHTML = '<span class="hint-icon icon-write"></span><b>Type</b> the word in English';
+    if (wSub) wSub.disabled = false;
+    if (robots.writing) robots.writing.onWaiting();
+    wordStartTime = Date.now();
+    isWritingAnswering = false;
+    updateWritingUI();
+}
+function handleWritingSubmit() {
+    if (isWritingAnswering || isWritingGameOver) return;
+    const wInput = document.getElementById('writingInput');
+    const wFb = document.getElementById('writingFeedback');
+    const wHint = document.getElementById('writingHintText');
+    const wSub = document.getElementById('writingSubmitBtn');
+    if (!wInput) return;
+    const userInput = wInput.value.trim();
+    if (userInput.length === 0) {
+        if (wHint) wHint.innerHTML = '<span class="hint-icon icon-warning"></span><b>Please type something first!</b>';
+        return;
+    }
+    isWritingAnswering = true;
+    if (wSub) wSub.disabled = true;
+    wInput.disabled = true;
+    const correct = writingCurrentItem.word;
+    const result = fuzzyCheckSpelling(userInput, correct);
+    const elapsed = (Date.now() - wordStartTime) / 1000;
+    aiUpdateWeight(currentTheme, correct, result.status, elapsed);
+    if (result.status === 'correct') {
+        const points = 5;
+        gameScore += points;
+        writingScore = gameScore;
+        wInput.classList.add('correct');
+        if (wFb) { wFb.className = 'writing-feedback correct'; wFb.innerHTML = '<span class="hint-icon icon-check"></span><b>Perfect!</b> +' + points + ' pts'; }
+        animateWritingRobot('happy');
+        playSound('correct');
+        speakWord(correct);
+        speakPraise(2);
+        setTimeout(() => {
+            writingIndex++;
+            gameIndex = writingIndex - 1;
+            isWritingAnswering = false;
+            showWritingWord();
+        }, 1400);
+        updateWritingUI();
+        return;
+    }
+    showWritingExplanation(userInput, correct, result);
+    updateWritingUI();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function showWritingExplanation(userInput, correctWord, result) {
+    const overlay = document.getElementById('writingExplanationOverlay');
+    const icon = document.getElementById('writingExplanationIcon');
+    const title = document.getElementById('writingExplanationTitle');
+    const text = document.getElementById('writingExplanationText');
+    const btn = document.getElementById('writingExplanationNextBtn');
+    if (!overlay) return;
+    let points = 0;
+    if (result.status === 'almost') {
+    icon.innerHTML = '<span class="hint-icon icon-warning xl"></span>';
+    title.textContent = 'Almost!';
+    title.className = 'writing-explanation-title almost';
+    let reasonText = result.reason === 'phonetic' ? ' (phonetic match)' : '';
+    text.innerHTML = 'You wrote: <b>' + userInput + '</b><br>Correct is: <b>' + correctWord + '</b><br><br>' + result.distance + ' letter' + (result.distance > 1 ? 's' : '') + ' off' + reasonText + '. Nice try!';
+    btn.textContent = 'Next →';
+    btn.className = 'writing-explanation-btn almost';
+    points = 2;
+    playSound('correct');
+    speakWord(correctWord);
+    speakPraise(2);
+}
+ else {
+        icon.innerHTML = '<span class="hint-icon icon-cross xl"></span>';
+        title.textContent = 'Wrong';
+        title.className = 'writing-explanation-title wrong';
+        text.innerHTML = 'You wrote: <b>' + userInput + '</b><br>Correct is: <b>' + correctWord + '</b><br><br>Don\'t worry, keep learning!';
+        btn.textContent = 'Continue →';
+        btn.className = 'writing-explanation-btn wrong';
+        points = 0;
+        playSound('wrong');
+        speakWord(correctWord);
+    }
+    if (points > 0) { gameScore += points; writingScore = gameScore; }
+    if (points > 0) animateWritingRobot('happy');
+    else animateWritingRobot('sad');
+    overlay.classList.add('active');
+    btn.onclick = null;
+    btn.onclick = function() {
+        overlay.classList.remove('active');
+        isWritingAnswering = false;
+        if (result.status === 'wrong') {
+            writingLastCorrectWord = writingCurrentItem;
+            setTimeout(() => { showWritingGameOver(correctWord); }, 200);
+        } else {
+            writingIndex++;
+            gameIndex = writingIndex - 1;
+            const wSub = document.getElementById('writingSubmitBtn');
+            const wi = document.getElementById('writingInput');
+            if (wSub) wSub.disabled = false;
+            if (wi) wi.disabled = false;
+            showWritingWord();
+        }
+    };
+}
+function updateWritingUI() {
+    const wsd = document.getElementById('writingScore');
+    const wPg = document.getElementById('writingProgress');
+    const wPt = document.getElementById('writingProgressText');
+    if (wsd) wsd.textContent = gameScore;
+    const total = writingWords.length;
+    const done = Math.min(writingIndex, total);
+    const pct = total > 0 ? (done / total) * 100 : 0;
+    if (wPg) wPg.style.width = pct + '%';
+    if (wPt) wPt.textContent = Math.min(writingIndex + 1, writingWords.length) + ' / ' + writingWords.length;
+}
+function showWritingGameOver(correctWord) {
+    isWritingGameOver = true;
+    const wo = document.getElementById('writingOverlay');
+    if (wo) wo.classList.remove('active');
+    const wordData = currentSessionWords.find(w => w.word === correctWord)
+              || currentWords.find(w => w.word === correctWord)
+              || currentWords[0];
+    lastCorrectWord = wordData;
+    gameoverImg.src = 'картинки/' + currentTheme + '/' + wordData.img;
+    gameoverImg.alt = wordData.word;
+    gameoverWordBelow.textContent = wordData.word;
+    gameoverOverlay.classList.add('active');
+}
+function showWritingComplete() {
+    if (typeof aiSaveGameResult === 'function') aiSaveGameResult(gameScore, writingMaxPossibleScore, currentTheme);
+    isWritingGameOver = true;
+    const wo = document.getElementById('writingOverlay');
+    if (wo) wo.classList.remove('active');
+    if (robots.menu) robots.menu.onComplete();
+    if (robots.writing) robots.writing.onComplete();
+    const starCount = getStarCount(gameScore, writingMaxPossibleScore);
+    completeStars.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+        const img = document.createElement('img');
+        img.src = 'картинки/ui/star_menu.png';
+        img.alt = i < starCount ? 'star' : 'empty star';
+        if (i >= starCount) img.classList.add('gray-star');
+        completeStars.appendChild(img);
+    }
+    completeScore.textContent = gameScore;
+    completeOverlay.classList.add('active');
+}
+
+// ==================== ЗВУК ====================
+function toggleSound(iconElement) {
+soundEnabled = (soundEnabled === false);
+const src = soundEnabled ? 'картинки/ui/sound_on.png' : 'картинки/ui/sound_off.png';
+document.querySelectorAll('.btn-sound img').forEach(img => { img.src = src; });
+}
+
+// ==================== ОБРАБОТЧИКИ ====================
+gameoverImg.addEventListener('click', function() { if (lastCorrectWord) speakWord(lastCorrectWord.word); });
+gameoverWordBelow.addEventListener('click', function() { if (lastCorrectWord) speakWord(lastCorrectWord.word); });
+gameoverTranslateBtn.addEventListener('click', function() { if (lastCorrectWord) { speakTranslation(lastCorrectWord.word); } });
+gameoverArrowBtn.addEventListener('click', function() {
+    gameoverOverlay.classList.remove('active');
+    currentLearnPage = 0;
+    learnTitle.textContent = currentTheme;
+    learnOverlay.classList.add('active');
+    renderLearnPage();
+});
+gameoverRetryBtn.addEventListener('click', function() {
+    gameoverOverlay.classList.remove('active');
+    if (gamePhase === 2) startDragGame(true);
+    else if (gamePhase === 3) startChooseGame(true);
+    else if (gamePhase === 4) startSpellingGame();
+    else if (gamePhase === 5) startWritingGame();
+    else startClickGame(true);
+});
+gameoverStopBtn.addEventListener('click', function() {
+gameoverOverlay.classList.remove('active');
+if (gameScore > 0) learnedWords = Math.max(learnedWords, gameScore);
+updateFooter();
+});
+completeNewBtn.addEventListener('click', function() {
+completeOverlay.classList.remove('active');
+if (gameScore > 0) learnedWords = Math.max(learnedWords, gameScore);
+let currentIndex = THEMES_LIST.findIndex(t => t.name === currentTheme);
+let nextIndex = (currentIndex + 1) % THEMES_LIST.length;
+currentTheme = THEMES_LIST[nextIndex].name;
+updateFooter();
+openLearn(currentTheme);
+});
+function goToMenu() {
+stopTimer();
+stopDragTimer();
+gameOverlay.classList.remove('active');
+dragOverlay.classList.remove('active');
+chooseGameOverlay.classList.remove('active');
+spellingOverlay.classList.remove('active');
+const wo = document.getElementById('writingOverlay');
+if (wo) wo.classList.remove('active');
+const wxo = document.getElementById('writingExplanationOverlay');
+if (wxo) wxo.classList.remove('active');
+learnOverlay.classList.remove('active');
+gameoverOverlay.classList.remove('active');
+if (gameScore > 0) learnedWords = Math.max(learnedWords, gameScore);
+updateFooter();
+}
+if (learnBackBtn) learnBackBtn.addEventListener('click', goToMenu);
+if (gameBackBtn) gameBackBtn.addEventListener('click', goToMenu);
+if (dragBackBtn) dragBackBtn.addEventListener('click', goToMenu);
+if (chooseGameBackBtn) chooseGameBackBtn.addEventListener('click', goToMenu);
+if (spellingBackBtn) spellingBackBtn.addEventListener('click', goToMenu);
+if (chooseBackBtn) chooseBackBtn.addEventListener('click', function(e) { e.stopPropagation(); chooseOverlay.classList.remove('active'); });
+if (learnChooseBtn) learnChooseBtn.addEventListener('click', function() {
+learnOverlay.classList.remove('active');
+chooseOverlay.classList.add('active');
+renderThemePage();
+});
+learnSoundBtn.addEventListener('click', function() { toggleSound(learnSoundIcon); });
+gameSoundBtn.addEventListener('click', function() { toggleSound(gameSoundIcon); });
+dragSoundBtn.addEventListener('click', function() { toggleSound(dragSoundIcon); });
+chooseGameSoundBtn.addEventListener('click', function() { toggleSound(chooseGameSoundIcon); });
+spellingSoundBtn.addEventListener('click', function() { toggleSound(spellingSoundIcon); });
+gameoverSoundBtn.addEventListener('click', function() { toggleSound(gameoverSoundIcon); });
+startBtn.addEventListener('click', function() {
+if (!WORDS_BY_THEME[currentTheme] || WORDS_BY_THEME[currentTheme].length === 0) {
+currentTheme = 'Animals';
+themeNameDisplay.textContent = 'Animals';
+}
+openLearn(currentTheme);
+});
+chooseBtn.addEventListener('click', function() { chooseOverlay.classList.add('active'); renderThemePage(); });
+chooseOverlay.addEventListener('click', function(e) { if (e.target === chooseOverlay) chooseOverlay.classList.remove('active'); });
+prevPageBtn.addEventListener('click', function() { if (currentPage > 0) { currentPage--; renderThemePage(); } });
+nextPageBtn.addEventListener('click', function() {
+const itemsPerPage = getItemsPerPage();
+const totalPages = Math.ceil(THEMES_LIST.length / itemsPerPage);
+if (currentPage < totalPages - 1) { currentPage++; renderThemePage(); }
+});
+learnPrev.addEventListener('click', function() { if (currentLearnPage > 0) { currentLearnPage--; renderLearnPage(); } });
+learnNext.addEventListener('click', function() {
+    const wordsToShow = currentSessionWords.length > 0 ? currentSessionWords : currentWords;
+    const totalPages = Math.ceil(wordsToShow.length / LEARN_ITEMS_PER_PAGE);
+    if (currentLearnPage < totalPages - 1) { currentLearnPage++; renderLearnPage(); }
+});
+learnPlayBtn.addEventListener('click', function() { gameScore = 0; gamePhase = 1; startClickGame(); });
+
+const writingSubmitBtn = document.getElementById('writingSubmitBtn');
+const writingInput = document.getElementById('writingInput');
+const writingBackBtn = document.getElementById('writingBackBtn');
+const writingSoundBtn = document.getElementById('writingSoundBtn');
+const writingSoundIcon = document.getElementById('writingSoundIcon');
+const learnWriteBtn = document.getElementById('learnWriteBtn');
+
+if (writingSubmitBtn) writingSubmitBtn.addEventListener('click', handleWritingSubmit);
+if (writingInput) writingInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleWritingSubmit(); });
+if (writingBackBtn) writingBackBtn.addEventListener('click', goToMenu);
+if (writingSoundBtn) writingSoundBtn.addEventListener('click', function() { toggleSound(writingSoundIcon); });
+if (learnWriteBtn) learnWriteBtn.addEventListener('click', function() { gameScore = 0; gamePhase = 5; startWritingGame(); });
+
+document.addEventListener('keydown', function(e) {
+    const overlay = document.getElementById('writingExplanationOverlay');
+    if (overlay && overlay.classList.contains('active') && e.key === 'Enter') {
+        e.preventDefault();
+        const btn = document.getElementById('writingExplanationNextBtn');
+        if (btn) btn.click();
+    }
+});
+
+// ==================== AI STATS PANEL ====================
+const aiStatsBtn = document.getElementById('aiStatsBtn');
+const aiStatsPanel = document.getElementById('aiStatsPanel');
+const aiStatsContent = document.getElementById('aiStatsContent');
+const aiResetBtn = document.getElementById('aiResetBtn');
+const aiProgressBtn = document.getElementById('aiProgressBtn');
+const aiProgressPanel = document.getElementById('aiProgressPanel');
+const aiClusterBtn = document.getElementById('aiClusterBtn');
+const aiClusterPanel = document.getElementById('aiClusterPanel');
+const aiClassifierBtn = document.getElementById('aiClassifierBtn');
+const aiClassifierPanel = document.getElementById('aiClassifierPanel');
+
+const aiModalOverlay = document.getElementById('aiModalOverlay');
+const aiModalClose = document.getElementById('aiModalClose');
+const aiModalTitle = document.getElementById('aiModalTitle');
+
+function closeAllAIPanels() {
+    if (aiStatsPanel) aiStatsPanel.style.display = 'none';
+    if (aiProgressPanel) aiProgressPanel.style.display = 'none';
+    if (aiClusterPanel) aiClusterPanel.style.display = 'none';
+    if (aiClassifierPanel) aiClassifierPanel.style.display = 'none';
+}
+
+function openAIModal(title, panelToShow, renderFn) {
+    closeAllAIPanels();
+    aiModalTitle.textContent = title;
+    if (panelToShow) panelToShow.style.display = 'block';
+    aiModalOverlay.classList.add('active');
+    if (typeof renderFn === 'function') renderFn();
+}
+
+if (aiModalClose) {
+    aiModalClose.addEventListener('click', function() {
+        aiModalOverlay.classList.remove('active');
+    });
+}
+if (aiModalOverlay) {
+    aiModalOverlay.addEventListener('click', function(e) {
+        if (e.target === aiModalOverlay) {
+            aiModalOverlay.classList.remove('active');
+        }
+    });
+}
+
+if (aiStatsBtn) {
+    aiStatsBtn.addEventListener('click', function() {
+        openAIModal('AI Analysis', aiStatsPanel, renderAIStats);
+    });
+}
+// ====== RESET MODAL ======
+const resetModalOverlay = document.getElementById('resetModalOverlay');
+const resetCancelBtn = document.getElementById('resetCancelBtn');
+const resetConfirmBtn = document.getElementById('resetConfirmBtn');
+
+function openResetModal() {
+    if (resetModalOverlay) resetModalOverlay.classList.add('active');
+}
+function closeResetModal() {
+    if (resetModalOverlay) resetModalOverlay.classList.remove('active');
+}
+
+function performReset() {
+    if (typeof aiResetWeights === 'function') aiResetWeights();
+    if (typeof aiResetProgress === 'function') aiResetProgress();
+    if (typeof aiResetClassifier === 'function') aiResetClassifier();
+    if (typeof aiResetClusters === 'function') aiResetClusters();
+    
+    localStorage.removeItem('wordTrainer_AI_weights');
+    localStorage.removeItem('wordTrainer_AI_progress');
+    localStorage.removeItem('wordTrainer_AI_clusters');
+    localStorage.removeItem('wordTrainer_AI_classifier');
+    
+    learnedWords = 0;
+    gameScore = 0;
+    updateFooter();
+    renderAIStats();
+    closeResetModal();
+    
+    const n = document.createElement('div');
+    n.innerHTML = '<img src="картинки/ui/icon_check.png" style="width:24px;height:24px;vertical-align:middle;margin-right:8px;"> All data has been reset successfully!';
+    n.style.cssText = 'position:fixed;top:30px;left:50%;transform:translateX(-50%);background:#2ecc71;color:#fff;padding:14px 24px;border-radius:50px;font-size:16px;font-weight:700;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 2500);
+}
+
+if (resetCancelBtn) {
+    resetCancelBtn.addEventListener('click', closeResetModal);
+}
+if (resetConfirmBtn) {
+    resetConfirmBtn.addEventListener('click', performReset);
+}
+if (resetModalOverlay) {
+    resetModalOverlay.addEventListener('click', function(e) {
+        if (e.target === resetModalOverlay) closeResetModal();
+    });
+}
+
+if (aiResetBtn) {
+    aiResetBtn.addEventListener('click', openResetModal);
+}
+
+const resetDataBtn = document.getElementById('resetDataBtn');
+if (resetDataBtn) {
+    resetDataBtn.addEventListener('click', openResetModal);
+}
+
+if (aiClusterBtn) {
+    aiClusterBtn.addEventListener('click', function() {
+        openAIModal('AI Word Clusters (k-means)', aiClusterPanel, function() {
+            if (window.AICluster) window.AICluster.render();
+        });
+    });
+}
+if (aiClassifierBtn) {
+    aiClassifierBtn.addEventListener('click', function() {
+        openAIModal('AI Error Classifier (logistic regression)', aiClassifierPanel, function() {
+            if (window.AIClassifier) window.AIClassifier.render();
+        });
+    });
+}
+if (aiProgressBtn) {
+    aiProgressBtn.addEventListener('click', function() {
+        openAIModal('AI Progress Prediction', aiProgressPanel, function() {
+            if (typeof window.aiRenderProgress === 'function') {
+                window.aiRenderProgress();
+            }
+        });
+    });
+}
+
+function renderAIStats() {
+    if (!aiStatsContent) return;
+
+    const allProblems = aiGetAllProblemWords(500);
+
+    if (allProblems.length === 0) {
+        aiStatsContent.innerHTML = 'No problem words yet! You are doing great. Play more games to gather data.';
+        return;
+    }
+
+    const byTheme = {};
+    allProblems.forEach(function(item) {
+        if (!byTheme[item.theme]) byTheme[item.theme] = [];
+        byTheme[item.theme].push(item);
+    });
+
+    const totalProblems = allProblems.length;
+    const themeCount = Object.keys(byTheme).length;
+
+    const sortedThemes = Object.keys(byTheme).sort(function(a, b) {
+        return byTheme[b].length - byTheme[a].length;
+    });
+
+    let html = '<div style="margin-bottom: 12px; color: #333; font-size: 13px; font-weight: 600;">';
+    html += totalProblems + ' problem word' + (totalProblems !== 1 ? 's' : '') + ' across ' + themeCount + ' theme' + (themeCount !== 1 ? 's' : '');
+    html += '</div>';
+
+    sortedThemes.forEach(function(themeName) {
+        const words = byTheme[themeName];
+
+        let themeImg = '';
+        if (typeof THEMES_LIST !== 'undefined') {
+            const themeData = THEMES_LIST.find(t => t.name === themeName);
+            if (themeData && themeData.img) {
+                themeImg = 'картинки/themes/' + themeData.img;
+            }
+        }
+
+        html += '<div style="margin: 12px 0 6px 0; padding: 8px 12px; background: rgba(91,200,232,0.15); border-radius: 10px; font-weight: 700; color: #1a1a2e; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">';
+        html += '<span style="display: flex; align-items: center; gap: 8px;">';
+        if (themeImg) {
+            html += '<img src="' + themeImg + '" alt="' + themeName + '" style="width: 28px; height: 28px; object-fit: contain; border-radius: 6px; background: #fff;">';
+        }
+        html += themeName;
+        html += '</span>';
+        html += '<span style="font-size: 11px; color: #666; font-weight: 600;">' + words.length + ' word' + (words.length !== 1 ? 's' : '') + '</span>';
+        html += '</div>';
+
+        html += '<table style="width:100%; border-collapse: collapse; font-size: 12px; margin-bottom: 6px;">';
+        words.forEach(function(item) {
+            let icon, color;
+            if (item.weight > 5) { icon = '🔴'; color = '#e74c3c'; }
+            else if (item.weight > 2.5) { icon = '🟠'; color = '#e67e22'; }
+            else { icon = '🟡'; color = '#f39c12'; }
+
+            html += '<tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">';
+            html += '<td style="padding:4px 6px; font-weight:600; color:#1a1a2e;">' + icon + ' ' + item.word + '</td>';
+            html += '<td style="text-align:right; padding:4px 6px; font-weight:600; color:' + color + ';">' + item.weight.toFixed(2) + '</td>';
+            html += '</tr>';
+        });
+        html += '</table>';
+    });
+
+    html += '<div style="margin-top:14px; padding-top:10px; border-top: 1px solid rgba(0,0,0,0.08); font-size:11px; color:#999; line-height:1.6;">';
+    html += '<b>Only problem words</b> (weight &gt; 1.2) are shown.<br>';
+    html += '🟡 1.2–2.5 · 🟠 2.5–5 · 🔴 &gt; 5';
+    html += '</div>';
+
+    aiStatsContent.innerHTML = html;
+}
+
+// ==================== ИНИЦИАЛИЗАЦИЯ ====================
+window.addEventListener('resize', function() { if (chooseOverlay.classList.contains('active')) renderThemePage(); });
+initRobots();
+updateFooter();
+renderThemePage();
+</script>
+
+</body>
+</html>
