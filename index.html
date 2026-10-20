@@ -637,7 +637,8 @@ body {
     line-height: 1.1 !important;
   }
 
-  /* --- 6. ИГРА SPELLING --- */
+
+    /* --- 6. ИГРА SPELLING --- */
   .spelling-slots {
     display: flex !important;
     flex-wrap: wrap !important;
@@ -650,10 +651,10 @@ body {
   }
   
   .spelling-slot {
-    width: 50px !important;
-    height: 50px !important;
-    font-size: 28px !important;
-    border-radius: 12px !important;
+    width: 45px !important; /* Чуть уменьшили, чтобы влезало больше */
+    height: 45px !important;
+    font-size: 24px !important;
+    border-radius: 10px !important;
     padding: 0 !important;
     flex-shrink: 0 !important;
     display: flex !important;
@@ -661,23 +662,28 @@ body {
     justify-content: center !important;
   }
 
+  /* ИСПРАВЛЕНИЕ: Трек с буквами теперь растягивается */
   .spelling-track {
-    height: 130px !important;
-    padding: 10px 0 !important;
+    height: auto !important; /* Убираем жесткую высоту */
+    min-height: 90px !important; /* Задаем минимальную высоту */
+    padding: 15px 5px !important; 
     display: flex !important;
-    flex-wrap: wrap !important;
+    flex-wrap: wrap !important; /* Буквы переносятся на новую строку */
     justify-content: center !important;
     align-items: center !important;
     gap: 8px !important;
+    overflow: visible !important; /* Разрешаем выходить за пределы, чтобы ничего не обрезалось */
   }
   
   .spelling-track-letter { 
-    width: 50px !important; 
-    height: 50px !important; 
-    font-size: 28px !important; 
-    border-radius: 12px !important;
+    width: 45px !important; 
+    height: 45px !important; 
+    font-size: 24px !important; 
+    border-radius: 10px !important;
     flex-shrink: 0 !important;
+    position: static !important; /* Убираем возможное абсолютное позиционирование */
   }
+  
 
   /* --- 7. ШАПКА --- */
   .score-block, .timer-container { margin: 0 !important; }
