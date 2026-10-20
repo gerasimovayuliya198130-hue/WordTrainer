@@ -505,14 +505,14 @@ body {
     max-width: 100% !important; 
   }
   .game-word {
-    font-size: 28px !important; /* Уменьшил слово, чтобы влезало */
+    font-size: 28px !important;
     text-align: center !important;
     margin: 0 auto 10px auto !important;
     display: table !important;
     padding: 5px 20px !important;
   }
 
-  /* --- 2. ИГРА DRAG (ИСПРАВЛЕНО) --- */
+  /* --- 2. ИГРА DRAG (ИСПРАВЛЕНО СМЕЩЕНИЕ) --- */
   .drag-grid-container { 
     display: flex !important; 
     flex-direction: column !important; 
@@ -524,36 +524,39 @@ body {
     grid-template-columns: repeat(3, 1fr) !important; 
     gap: 8px !important; 
     padding-bottom: 10px !important;
+    justify-items: center !important; /* Центрируем элементы в сетке */
   }
   
-  /* Карточки Drag: делаем их меньше и добавляем место снизу для слова */
   .drag-image-item, .drag-drop-item {
     width: 100% !important;
     aspect-ratio: 1/1 !important;
-    max-width: 100% !important;
-    margin-bottom: 15px !important; /* Отступ для надписи */
+    max-width: 90px !important; /* Чуть уменьшил, чтобы влезало ровно */
+    margin: 0 auto 15px auto !important; /* Центрируем и даем место снизу */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 
   .drag-image-item img, .drag-drop-item img { 
-    width: 70% !important; 
-    height: 70% !important; 
+    width: 80% !important; 
+    height: 80% !important; 
     object-fit: contain !important;
   }
 
-  /* Надписи под картинками в Drag */
   .drag-drop-item .word-label { 
     font-size: 10px !important; 
-    bottom: -22px !important; 
+    bottom: -20px !important; 
     padding: 2px 4px !important;
     white-space: normal !important;
     text-align: center !important;
-    width: 90% !important;
+    width: 100% !important;
     line-height: 1.1 !important;
   }
   
-  /* Убираем принудительный сдвиг, который ломал сетку */
+  /* Убираем класс сдвига, который ломал сетку */
   .drag-item-shift {
     margin-top: 0 !important;
+    transform: none !important;
   }
 
   /* --- 3. ЭКРАН ИЗУЧЕНИЯ (Learn) --- */
@@ -564,6 +567,7 @@ body {
   .learn-card { 
     padding: 5px !important; 
     min-height: 90px !important;
+    position: relative !important;
   }
   .learn-card img { 
     width: 60px !important; 
@@ -571,13 +575,14 @@ body {
     margin: 0 auto !important;
   }
   
-  /* Иконка перевода: жестко задаем маленький размер */
+  /* Кнопка перевода: МАЛЕНЬКАЯ И В УГЛУ */
   .learn-card .translate-btn { 
-    width: 18px !important; 
-    height: 18px !important; 
-    top: 3px !important; 
-    right: 3px !important; 
+    width: 16px !important; 
+    height: 16px !important; 
+    top: 4px !important; 
+    right: 4px !important; 
     position: absolute !important;
+    z-index: 10 !important;
   }
   .learn-card .translate-btn img {
     width: 100% !important;
@@ -594,16 +599,8 @@ body {
     font-size: 22px !important; 
     margin-top: 5px !important;
   }
-  .choose-back-wrap { 
-    top: 15px !important; 
-    left: 15px !important; 
-  }
-  .choose-back-wrap .btn-back-game img { 
-    width: 35px !important; 
-    height: 35px !important; 
-  }
 
-  /* --- 5. ЭКРАН ВЫБОРА (Choose Game) - СЕТКА В 2 КОЛОНКИ --- */
+  /* --- 5. ЭКРАН ВЫБОРА (Choose Game) - ОДИНАКОВЫЕ КНОПКИ --- */
   .choose-game-area { 
     display: flex !important;
     flex-direction: column !important; 
@@ -611,7 +608,6 @@ body {
     padding: 0 5px !important;
   }
   
-  /* Картинка сверху по центру */
   .choose-game-image { 
     flex: 0 0 120px !important; 
     max-width: 120px !important; 
@@ -622,28 +618,59 @@ body {
     height: 80% !important;
   }
 
-  /* Опции снизу в виде сетки (2 колонки) */
   .choose-game-options { 
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 колонки */
-    gap: 8px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
     width: 100% !important;
     max-width: 100% !important;
   }
   
+  /* Одинаковый размер кнопок */
   .choose-game-option { 
     padding: 10px 5px !important; 
     font-size: 16px !important; 
-    min-height: 45px !important;
+    height: 60px !important; /* Фиксированная высота */
     margin: 0 !important;
     width: 100% !important;
-    word-break: break-word !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    text-align: center !important;
+    word-break: break-word !important;
+    line-height: 1.1 !important;
   }
 
-  /* --- 6. ШАПКА (в одну строку) --- */
+  /* --- 6. ИГРА SPELLING (4 игра) - КВАДРАТНЫЕ ЯЧЕЙКИ И ПЕРЕНОС --- */
+  .spelling-slots {
+    display: flex !important;
+    flex-wrap: wrap !important; /* Разрешаем перенос на новую строку */
+    justify-content: center !important;
+    gap: 6px !important;
+    margin: 10px 0 !important;
+  }
+  
+  .spelling-slot {
+    width: 45px !important; /* Чуть больше */
+    height: 45px !important; /* Строго квадратные */
+    font-size: 24px !important; /* Крупные буквы */
+    border-radius: 10px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Буквы в треке (откуда берем) тоже делаем крупнее и квадратнее */
+  .spelling-track {
+    height: 120px !important; /* Чуть увеличим высоту трека */
+  }
+  .spelling-track-letter { 
+    width: 45px !important; 
+    height: 45px !important; 
+    font-size: 24px !important; 
+    border-radius: 10px !important;
+  }
+
+  /* --- 7. ШАПКА (в одну строку) --- */
   .score-block, .timer-container { margin: 0 !important; }
   .game-header, .drag-header, .choose-game-header, .spelling-header, .writing-header {
     flex-direction: row !important;
@@ -677,8 +704,6 @@ body {
   .learn-actions .btn { width: 100% !important; margin-bottom: 5px !important; }
   .writing-input-wrap { flex-direction: column !important; }
   .writing-submit-btn { width: 100% !important; }
-  .spelling-slot { width: 35px !important; height: 40px !important; font-size: 20px !important; }
-  .spelling-track-letter { width: 35px !important; height: 35px !important; font-size: 20px !important; }
 }
 </style>
 </head>
