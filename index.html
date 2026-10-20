@@ -2299,12 +2299,25 @@ img.draggable = false;
 imageItem.appendChild(img);
 dragLeftArea.appendChild(imageItem);
 imageItem.addEventListener('dragstart', function(e) {
-if (isGameOver || this.classList.contains('placed')) { e.preventDefault(); return; }
-this.classList.add('dragging');
-e.dataTransfer.effectAllowed = 'copy';
-e.dataTransfer.setData('text/plain', this.dataset.word);
-e.dataTransfer.setData('source-idx', this.dataset.idx);
-gameIndex = dragPlacedCount + startIdx + idx;
+    if (isGameOver || this.classList.contains('placed')) { e.preventDefault(); return; }
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/plain', this.dataset.word);
+    e.dataTransfer.setData('source-idx', this.dataset.idx);
+    gameIndex = dragPlacedCount + startIdx + idx;
+});
+
+imageItem.addEventListener('click', function(e) {
+    if (isGameOver || this.classList.contains('placed')) return;
+    dragLeftArea.querySelectorAll('.drag-image-item').forEach(el => {
+        el.style.borderColor = '';
+        el.style.transform = '';
+    });
+    this.style.borderColor = '#3498db';
+    this.style.transform = 'scale(1.05)';
+    window.touchSelectedWord = this.dataset.word;
+    window.touchSelectedIdx = this.dataset.idx;
+    window.touchSelectedEl = this;
 });
 imageItem.addEventListener('dragend', function(e) { this.classList.remove('dragging'); });
 });
@@ -2321,10 +2334,31 @@ wordLabel.className = 'word-label';
 wordLabel.textContent = item.word;
 dropItem.appendChild(wordLabel);
 dragRightArea.appendChild(dropItem);
+
 dropItem.addEventListener('dragover', function(e) {
-e.preventDefault();
-e.dataTransfer.dropEffect = 'copy';
-if (isGameOver === false && this.classList.contains('filled') === false) this.classList.add('drag-over');
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    if (isGameOver === false && this.classList.contains('filled') === false) this.classList.add('drag-over');
+});
+
+dropItem.addEventListener('click', function(e) {
+    if (isGameOver || this.classList.contains('filled')) return;
+    if (!window.touchSelectedWord) {
+        dragHintText.innerHTML = '<span class="hint-icon icon-warning"></span><b>Сначала нажми на картинку!</b>';
+        return;
+    }
+    const draggedWord = window.touchSelectedWord;
+    const sourceIdx = window.touchSelectedIdx;
+    const targetWord = this.dataset.word;
+    const draggedElement = window.touchSelectedEl;
+    const hasShift = this.classList.contains('drag-item-shift');
+    const isCorrect = (draggedWord === targetWord);
+    
+    window.touchSelectedWord = null;
+    window.touchSelectedIdx = null;
+    window.touchSelectedEl = null;
+    
+    handleDragDropResult(draggedElement, this, sourceIdx, isCorrect, hasShift);
 });
 dropItem.addEventListener('dragleave', function(e) { this.classList.remove('drag-over'); });
 dropItem.addEventListener('drop', function(e) {
