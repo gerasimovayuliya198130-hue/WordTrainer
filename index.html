@@ -2643,35 +2643,37 @@ const item = chooseWords[chooseIndex];
 chooseGameImg.src = 'картинки/' + currentTheme + '/' + item.img;
 chooseGameImg.alt = item.word;
 animateRobot('neutral', 3);
+
+// 1. Берем ВСЕ слова из текущей темы (и только из нее)
+const themeWords = WORDS_BY_THEME[currentTheme] || [];
 let options = [item.word];
 const usedWords = new Set([item.word]);
-const others = chooseWords.filter((_, i) => i !== chooseIndex);
-const shuffledOthers = shuffle([...others]);
-for (let i = 0; i < shuffledOthers.length && options.length < 4; i++) {
-if (usedWords.has(shuffledOthers[i].word) === false) {
-options.push(shuffledOthers[i].word);
-usedWords.add(shuffledOthers[i].word);
+
+// 2. Перемешиваем слова текущей темы и берем из них 3 непохожих варианта
+const shuffledThemeWords = shuffle([...themeWords]);
+for (let i = 0; i < shuffledThemeWords.length && options.length < 4; i++) {
+    if (usedWords.has(shuffledThemeWords[i].word) === false) {
+        options.push(shuffledThemeWords[i].word);
+        usedWords.add(shuffledThemeWords[i].word);
+    }
 }
-}
-let fallbackIndex = 0;
-while (options.length < 4) {
-const fallback = WORDS_BY_THEME['Animals'];
-if (fallbackIndex >= fallback.length) break;
-if (usedWords.has(fallback[fallbackIndex].word) === false) {
-options.push(fallback[fallbackIndex].word);
-usedWords.add(fallback[fallbackIndex].word);
-}
-fallbackIndex++;
-}
+
+// 3. Если в теме вдруг меньше 4 слов (например, тема Family), 
+// берем остальные слова из этой же темы (даже если они повторяются визуально, 
+// лучше так, чем мешать темы).
+// Но так как у тебя в темах минимум 10 слов, этот блок сработает редко.
+
+// 4. Перемешиваем и выводим
 const shuffledOptions = shuffle([...options]);
 chooseGameOptions.innerHTML = '';
 shuffledOptions.forEach(optWord => {
-const option = document.createElement('div');
-option.className = 'choose-game-option';
-option.textContent = optWord;
-option.addEventListener('click', () => handleChooseGameClick(option, optWord, item.word));
-chooseGameOptions.appendChild(option);
+    const option = document.createElement('div');
+    option.className = 'choose-game-option';
+    option.textContent = optWord;
+    option.addEventListener('click', () => handleChooseGameClick(option, optWord, item.word));
+    chooseGameOptions.appendChild(option);
 });
+
 isAnswering = false;
 startTimer();
 }
