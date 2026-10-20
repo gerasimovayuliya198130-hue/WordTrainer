@@ -543,11 +543,17 @@ html, body {
     gap: 15px; 
     max-height: none; 
   }
-  .drag-left-area, .drag-right-area { 
+    .drag-left-area, .drag-right-area { 
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* 3 в ряд */
     gap: 10px; 
+    margin-bottom: 40px; /* Отступ снизу, чтобы слова не наезжали на слова */
   }
+  .drag-right-area {
+    margin-top: 20px; /* Отделяем слова от картинок */
+    border-top: 2px dashed #ccc;
+    padding-top: 30px;
+  } 
   .drag-image-item, .drag-drop-item { 
     max-width: 100%; 
     aspect-ratio: 1/1;
@@ -2309,12 +2315,15 @@ imageItem.addEventListener('dragstart', function(e) {
 
 imageItem.addEventListener('click', function(e) {
     if (isGameOver || this.classList.contains('placed')) return;
+    // Снимаем выделение со всех остальных картинок
     dragLeftArea.querySelectorAll('.drag-image-item').forEach(el => {
-        el.style.borderColor = '';
-        el.style.transform = '';
+        el.style.borderColor = '#ddd'; // Возвращаем стандартную рамку
+        el.style.transform = 'none';
     });
+    // Подсвечиваем выбранную
     this.style.borderColor = '#3498db';
     this.style.transform = 'scale(1.05)';
+    // Запоминаем выбор
     window.touchSelectedWord = this.dataset.word;
     window.touchSelectedIdx = this.dataset.idx;
     window.touchSelectedEl = this;
@@ -2343,10 +2352,10 @@ dropItem.addEventListener('dragover', function(e) {
 
 dropItem.addEventListener('click', function(e) {
     if (isGameOver || this.classList.contains('filled')) return;
-    if (!window.touchSelectedWord) {
-        dragHintText.innerHTML = '<span class="hint-icon icon-warning"></span><b>Сначала нажми на картинку!</b>';
-        return;
-    }
+    
+    // Если картинка не выбрана, ничего не делаем
+    if (!window.touchSelectedWord) return;
+    
     const draggedWord = window.touchSelectedWord;
     const sourceIdx = window.touchSelectedIdx;
     const targetWord = this.dataset.word;
@@ -2354,12 +2363,20 @@ dropItem.addEventListener('click', function(e) {
     const hasShift = this.classList.contains('drag-item-shift');
     const isCorrect = (draggedWord === targetWord);
     
+    // Сбрасываем выбор после клика
     window.touchSelectedWord = null;
     window.touchSelectedIdx = null;
     window.touchSelectedEl = null;
+    // Снимаем подсветку с картинки
+    if (draggedElement) {
+        draggedElement.style.borderColor = '#ddd';
+        draggedElement.style.transform = 'none';
+    }
     
+    // Запускаем проверку
     handleDragDropResult(draggedElement, this, sourceIdx, isCorrect, hasShift);
 });
+
 dropItem.addEventListener('dragleave', function(e) { this.classList.remove('drag-over'); });
 dropItem.addEventListener('drop', function(e) {
 e.preventDefault();
