@@ -295,7 +295,22 @@ body {
 /* ====== 8. GAME 4: SPELLING ====== */
 .spelling-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
 .spelling-overlay.active { display: flex; }
-.spelling-box { background: rgba(255,255,255,0.95); border-radius: 60px; padding: 20px 40px 25px; max-width: 850px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 90vh; min-height: 480px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.spelling-box {
+  background: rgba(255,255,255,0.95);
+  border-radius: 60px;
+  padding: 20px 40px 25px;
+  max-width: 850px;
+  width: 100%;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: visible;   /* было hidden */
+}
 .spelling-header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px 4px 12px; flex-shrink: 0; gap: 10px; min-height: 130px; }
 .spelling-header-left { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
 .spelling-header-left .score-block { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: 6px; margin-left: 60px; }
@@ -650,7 +665,11 @@ body {
   }
 
   /* --- 6. ИГРА SPELLING --- */
-      .spelling-slots {
+     .spelling-box {              /* ← ВОТ СЮДА добавь новое правило */
+    overflow: visible !important;
+  }
+  
+  .spelling-slots {
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
@@ -675,18 +694,20 @@ body {
   }
 
   /* ИСПРАВЛЕНИЕ: Трек с буквами теперь растягивается */
-           .spelling-track {
-    height: auto !important;
-    min-height: 80px !important;
-    padding: 10px 6px !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 5px !important;
-    overflow: visible !important;
-    border-radius: 20px !important;
-  }
+   .spelling-track {
+  height: auto !important;
+  min-height: 80px !important;
+  padding: 10px 6px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 5px !important;
+  overflow: visible !important;   /* уже было — оставляем */
+  border-radius: 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
   
      .spelling-track-letter { 
     width: 28px !important; 
@@ -698,19 +719,21 @@ body {
     box-sizing: border-box !important;
   }
 
-        .spelling-track-letters {
-    position: static !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 5px !important;
-    width: 100% !important;
-    height: auto !important;
-    padding: 4px 0 !important;
-    box-sizing: border-box !important;
-    overflow: visible !important;
-  }
+  .spelling-track-letters {
+  position: static !important;
+  display: flex !important;
+  flex-wrap: wrap !important;      /* ключевое — перенос строк */
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  padding: 4px 2px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;    /* чтобы буквы не обрезались */
+}
+
   /* --- 7. ШАПКА --- */
   .score-block, .timer-container { margin: 0 !important; }
   .game-header, .drag-header, .choose-game-header, .spelling-header, .writing-header {
