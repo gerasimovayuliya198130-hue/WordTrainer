@@ -242,12 +242,18 @@ body {
 .drag-hint-text { color: #666; font-size: 14px; min-height: 18px; margin-bottom: 4px; flex-shrink: 0; }
 .drag-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: visible; padding: 8px; min-height: 0; max-height: 72vh; margin-top: 20px; }
 .drag-left-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 6px; align-content: start; min-height: 0; }
+
+
+
 .drag-image-item { width: 100%; aspect-ratio: 1/1; max-width: 200px; background: rgba(255,255,255,0.9); border-radius: 20px; border: 3px solid #ddd; display: flex; align-items: center; justify-content: center; cursor: grab; transition: all 0.3s ease; margin: 0 auto; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
 .drag-image-item:hover { transform: scale(1.06) rotate(-2deg); border-color: #3498db; box-shadow: 0 6px 20px rgba(52,152,219,0.25); }
 .drag-image-item.dragging { opacity: 0.4; border-color: #3498db; transform: scale(0.95); }
 .drag-image-item.placed { opacity: 0.15; cursor: default; pointer-events: none; border-color: #2ecc71; transform: scale(0.9); }
 .drag-image-item img { width: 80%; height: 80%; object-fit: contain; border-radius: 12px; pointer-events: none; user-select: none; -webkit-user-drag: none; background: transparent; }
 .drag-right-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 6px; align-content: start; min-height: 0; }
+
+
+
 .drag-drop-item { width: 100%; aspect-ratio: 1/1; max-width: 200px; background: rgba(255,255,255,0.5); border-radius: 20px; border: 3px dashed #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; margin: 0 auto; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 .drag-drop-item.drag-over { border-color: #3498db; background: rgba(52,152,219,0.08); transform: scale(1.05); }
 .drag-drop-item.correct { border-color: #2ecc71; background: rgba(46,204,113,0.15); border-style: solid; }
@@ -507,8 +513,12 @@ body {
     font-size: 28px !important;
     text-align: center !important;
     margin: 0 auto 10px auto !important;
-    display: table !important;
+    display: flex !important;          /* Используем flex для центрирования */
+    justify-content: center !important; /* По ширине */
+    align-items: center !important;     /* По высоте */
+    min-height: 60px !important;        /* Задаем высоту окошка */
     padding: 5px 20px !important;
+    border-radius: 20px !important;
   }
 
   /* --- 2. ИГРА DRAG --- */
@@ -518,13 +528,15 @@ body {
     gap: 15px !important; 
     margin-top: 10px !important;
   }
-  .drag-left-area, .drag-right-area { 
+    .drag-left-area, .drag-right-area { 
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important; 
     gap: 8px !important; 
     padding-bottom: 10px !important;
     justify-items: center !important;
   }
+  
+  
   
   .drag-image-item, .drag-drop-item {
     width: 100% !important;
@@ -637,8 +649,7 @@ body {
     line-height: 1.1 !important;
   }
 
-
-    /* --- 6. ИГРА SPELLING --- */
+  /* --- 6. ИГРА SPELLING --- */
   .spelling-slots {
     display: flex !important;
     flex-wrap: wrap !important;
@@ -663,27 +674,27 @@ body {
   }
 
   /* ИСПРАВЛЕНИЕ: Трек с буквами теперь растягивается */
-  .spelling-track {
-    height: auto !important; /* Убираем жесткую высоту */
-    min-height: 90px !important; /* Задаем минимальную высоту */
-    padding: 15px 5px !important; 
+    .spelling-track {
+    height: auto !important;            /* Высота подстраивается под контент */
+    min-height: 100px !important; 
+    padding: 15px 5px !important;
     display: flex !important;
-    flex-wrap: wrap !important; /* Буквы переносятся на новую строку */
+    flex-wrap: wrap !important;         /* Буквы переносятся на новую строку */
     justify-content: center !important;
     align-items: center !important;
-    gap: 8px !important;
-    overflow: visible !important; /* Разрешаем выходить за пределы, чтобы ничего не обрезалось */
+    gap: 10px !important;
+    overflow: visible !important;       /* Ничего не обрезается */
+    border-radius: 20px !important;
   }
   
   .spelling-track-letter { 
-    width: 45px !important; 
-    height: 45px !important; 
-    font-size: 24px !important; 
-    border-radius: 10px !important;
+    width: 50px !important; 
+    height: 50px !important; 
+    font-size: 28px !important; 
+    border-radius: 12px !important;
     flex-shrink: 0 !important;
-    position: static !important; /* Убираем возможное абсолютное позиционирование */
+    position: static !important;
   }
-  
 
   /* --- 7. ШАПКА --- */
   .score-block, .timer-container { margin: 0 !important; }
@@ -2424,6 +2435,7 @@ dragItemsData = batch.map(item => ({ ...item, placed: false }));
 dragItemStatus = batch.map(() => false);
 dragLeftArea.innerHTML = '';
 dragRightArea.innerHTML = '';
+
 const shuffledForLeft = shuffle([...batch]);
 const rightSideItems = shuffle([...batch]);
 shuffledForLeft.forEach((item, idx) => {
