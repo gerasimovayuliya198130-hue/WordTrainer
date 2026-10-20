@@ -309,7 +309,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: visible;   /* было hidden */
+  overflow: visible;
 }
 .spelling-header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 12px 4px 12px; flex-shrink: 0; gap: 10px; min-height: 130px; }
 .spelling-header-left { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
@@ -671,16 +671,16 @@ body {
     display: flex !important;
   }
 
-  .spelling-box {
+    .spelling-box {
     overflow: visible !important;
     padding: 20px 15px !important;
     border-radius: 30px !important;
-    max-height: 95vh !important;
-    min-height: 450px !important; /* Делает коробку большой */
     width: 100% !important;
+    max-height: 95vh !important; 
+    min-height: 500px !important; /* Делает коробку большой */
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important; /* Центрирует содержимое внутри */
+    justify-content: flex-start !important; 
   }
 
   .spelling-slots {
