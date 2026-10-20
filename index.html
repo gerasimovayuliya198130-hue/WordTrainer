@@ -664,30 +664,23 @@ body {
     line-height: 1.1 !important;
   }
 
-   /* --- 6. ИГРА SPELLING --- */
+     /* --- 6. ИГРА SPELLING --- */
   .spelling-overlay {
     padding: 10px !important;
-    align-items: center !important; /* ВОЗВРАЩАЕМ ОКНО В ЦЕНТР */
-    overflow-y: auto !important;
+    align-items: center !important; /* Вот это ставит окно по центру */
+    display: flex !important;
   }
 
   .spelling-box {
     overflow: visible !important;
-    padding: 15px 10px 20px !important;
+    padding: 20px 15px !important;
     border-radius: 30px !important;
-    max-height: 95vh !important; /* Ограничиваем высоту, чтобы влезало в экран */
-    min-height: 400px !important; /* Задаем нормальную высоту окна */
+    max-height: 95vh !important;
+    min-height: 450px !important; /* Делает коробку большой */
     width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important; /* Центрируем контент внутри коробки */
-  }
-
-  .spelling-word-show {
-    font-size: 32px !important; /* Увеличиваем слово-подсказку сверху */
-    letter-spacing: 4px !important;
+    justify-content: center !important; /* Центрирует содержимое внутри */
   }
 
   .spelling-slots {
@@ -695,19 +688,16 @@ body {
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 8px !important; /* Чуть больше отступа между слотами */
+    gap: 8px !important;
     margin: 15px 0 !important;
-    padding: 0 5px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    padding: 0 !important;
   }
 
   .spelling-slot {
-    width: 36px !important; /* УВЕЛИЧИВАЕМ СЛОТЫ */
+    width: 36px !important; /* Крупные слоты */
     height: 44px !important;
-    font-size: 22px !important; /* УВЕЛИЧИВАЕМ ШРИФТ */
+    font-size: 22px !important;
     border-radius: 9px !important;
-    padding: 0 !important;
     flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
@@ -717,17 +707,15 @@ body {
   .spelling-track {
     height: auto !important;
     min-height: 80px !important;
-    padding: 12px 8px !important;
-    display: flex !important; /* Возвращаем flex для центрирования */
+    padding: 10px !important;
+    display: flex !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
-    overflow: visible !important;
     border-radius: 20px !important;
     width: 100% !important;
-    max-width: 100% !important;
     box-sizing: border-box !important;
-    position: relative !important;
+    background: #f0f4f8 !important; /* Легкий фон для трека */
   }
 
   .spelling-track-letters {
@@ -738,17 +726,13 @@ body {
     align-items: center !important;
     gap: 8px !important;
     width: 100% !important;
-    max-width: 100% !important;
     height: auto !important;
-    padding: 4px !important;
-    box-sizing: border-box !important;
-    overflow: visible !important;
   }
 
   .spelling-track-letter {
-    width: 38px !important; /* УВЕЛИЧИВАЕМ БУКВЫ */
+    width: 38px !important; /* Крупные буквы */
     height: 38px !important;
-    font-size: 22px !important; /* УВЕЛИЧИВАЕМ ШРИФТ БУКВ */
+    font-size: 22px !important;
     border-radius: 9px !important;
     flex: 0 0 auto !important;
     position: static !important;
