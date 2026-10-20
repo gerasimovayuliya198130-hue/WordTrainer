@@ -2636,6 +2636,7 @@ const globalTaskNumber = getGlobalTaskNumber();
 chooseGameProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
 showChooseWord();
 }
+
 function showChooseWord() {
 if (isGameOver) return;
 if (chooseIndex >= chooseWords.length) { startSpellingGame(); return; }
@@ -2644,12 +2645,12 @@ chooseGameImg.src = 'картинки/' + currentTheme + '/' + item.img;
 chooseGameImg.alt = item.word;
 animateRobot('neutral', 3);
 
-// 1. Берем ВСЕ слова из текущей темы (и только из нее)
+// Берем ВСЕ слова из текущей темы (и только из нее)
 const themeWords = WORDS_BY_THEME[currentTheme] || [];
 let options = [item.word];
 const usedWords = new Set([item.word]);
 
-// 2. Перемешиваем слова текущей темы и берем из них 3 непохожих варианта
+// Перемешиваем слова текущей темы и берем из них 3 непохожих варианта
 const shuffledThemeWords = shuffle([...themeWords]);
 for (let i = 0; i < shuffledThemeWords.length && options.length < 4; i++) {
     if (usedWords.has(shuffledThemeWords[i].word) === false) {
@@ -2658,12 +2659,7 @@ for (let i = 0; i < shuffledThemeWords.length && options.length < 4; i++) {
     }
 }
 
-// 3. Если в теме вдруг меньше 4 слов (например, тема Family), 
-// берем остальные слова из этой же темы (даже если они повторяются визуально, 
-// лучше так, чем мешать темы).
-// Но так как у тебя в темах минимум 10 слов, этот блок сработает редко.
-
-// 4. Перемешиваем и выводим
+// Перемешиваем и выводим
 const shuffledOptions = shuffle([...options]);
 chooseGameOptions.innerHTML = '';
 shuffledOptions.forEach(optWord => {
