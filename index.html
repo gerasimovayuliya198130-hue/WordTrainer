@@ -718,9 +718,9 @@ body {
     justify-content: center !important;
   }
 
-  .spelling-track {
+    .spelling-track {
     height: auto !important;
-    min-height: 80px !important;
+    min-height: 120px !important;   /* ← было 80px */
     padding: 10px !important;
     display: flex !important;
     flex-wrap: wrap !important;
@@ -732,6 +732,8 @@ body {
     background: #f0f4f8 !important;
     flex-shrink: 0 !important;
   }
+   
+  .spelling-robot-runner { width: 60px !important; height: 75px !important; }
 
   .spelling-track-letters {
     position: static !important;
@@ -2780,6 +2782,40 @@ spellingRobotRunner.style.transition = 'left 1.8s ease-in-out';
 spellingRobotRunner.style.left = '-110px';
 }, 2400);
 }
+
+// Перемешивает буквы с плавной анимацией (каждая буква «едет» на новое место)
+function shuffleLettersAnimated(container, mustDifferFrom) {
+  const els = Array.from(container.children);
+  if (els.length < 2) return;
+
+  const before = new Map(els.map(el => [el, el.getBoundingClientRect()]));
+
+  let order, tries = 0;
+  do {
+    order = shuffle([...els]);
+    tries++;
+  } while (
+    mustDifferFrom &&
+    order.map(e => e.dataset.letter).join('') === mustDifferFrom &&
+    tries < 15
+  );
+
+  order.forEach(el => container.appendChild(el));
+
+  order.forEach(el => {
+    const a = before.get(el);
+    const b = el.getBoundingClientRect();
+    const dx = a.left - b.left, dy = a.top - b.top;
+    if (!dx && !dy) return;
+    el.style.transition = 'none';
+    el.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    el.getBoundingClientRect();
+    el.style.transition = 'transform 0.5s ease, background 0.4s ease, border-color 0.4s ease';
+    el.style.transform = '';
+    setTimeout(() => { el.style.transition = ''; }, 600);
+  });
+}
+
 function startSpellingGame() {
 const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
 spellingWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
@@ -2809,79 +2845,87 @@ showSpellingIntro();
 }
 
 function showSpellingIntro() {
-if (isSpellingGameOver) return;
-if (spellingIndex >= spellingWords.length) { showSpellingComplete(); return; }
-const myRun = ++spellingRunId;
-const globalTaskNumber = getGlobalTaskNumber();
-spellingProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
-const item = spellingWords[spellingIndex];
-currentWord = item.word;
-currentSlotIndex = 0;
-spellingIntroShown = false;
-robotRanOnce = false;
-spellingHadMistakes = false;
-spellingMistakeCount = 0;
-spellingWordShow.textContent = currentWord;
-spellingWordShow.classList.remove('hidden');
-setTimeout(() => { speakWord(currentWord); }, 300);
-const srt = document.getElementById('spellingRobotTop');
-if (srt) srt.style.display = 'none';
-spellingRobotRunner.style.transition = 'none';
-spellingRobotRunner.style.left = '-110px';
-spellingSlots.innerHTML = '';
-const letters = currentWord.split('');
-letters.forEach((letter, idx) => {
-const slot = document.createElement('div');
-slot.className = 'spelling-slot empty';
-slot.dataset.idx = idx;
-slot.textContent = '';
-spellingSlots.appendChild(slot);
-});
-spellingTrackLettersEl.innerHTML = '';
-letters.forEach((letter, idx) => {
-const letterEl = document.createElement('div');
-letterEl.className = 'spelling-track-letter';
-letterEl.textContent = letter;
-letterEl.dataset.idx = idx;
-letterEl.dataset.letter = letter;
-letterEl.style.pointerEvents = 'none';
-spellingTrackLettersEl.appendChild(letterEl);
-});
-setTimeout(() => {
-  if (myRun !== spellingRunId) return;   // ← добавь эту строку
-  window.spellingStartTime = Date.now(); 
-  spellingWordShow.classList.add('hidden');
-  spellingIntroShown = true;
-  let shuffledLetters;
-  let attempts = 0;
-  do {
-    shuffledLetters = shuffle([...letters]);
-    attempts++;
-    const isSameOrder = shuffledLetters.every((letter, idx) => letter === letters[idx]);
-    if (isSameOrder === false) break;
-    if (attempts > 10) break;
-  } while (true);
+  if (isSpellingGameOver) return;
+  if (spellingIndex >= spellingWords.length) { showSpellingComplete(); return; }
+  const myRun = ++spellingRunId;
+  const globalTaskNumber = getGlobalTaskNumber();
+  spellingProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
+
+  const item = spellingWords[spellingIndex];
+  currentWord = item.word;
+  const wordSnapshot = currentWord;
+  currentSlotIndex = 0;
+  spellingIntroShown = false;
+  robotRanOnce = false;
+  spellingHadMistakes = false;
+  spellingMistakeCount = 0;
+
+  spellingWordShow.textContent = currentWord;
+  spellingWordShow.classList.remove('hidden');
+  setTimeout(() => { if (myRun === spellingRunId) speakWord(currentWord); }, 300);
+
+  const srt = document.getElementById('spellingRobotTop');
+  if (srt) srt.style.display = 'none';
+  spellingRobotRunner.style.transition = 'none';
+  spellingRobotRunner.style.left = '-110px';
+
+  const letters = currentWord.split('');
+
+  // Пустые ячейки
+  spellingSlots.innerHTML = '';
+  letters.forEach((letter, idx) => {
+    const slot = document.createElement('div');
+    slot.className = 'spelling-slot empty';
+    slot.dataset.idx = idx;
+    spellingSlots.appendChild(slot);
+  });
+
+  // Буквы на дорожке: сначала по порядку, кликать пока нельзя
   spellingTrackLettersEl.innerHTML = '';
-  shuffledLetters.forEach((letter, idx) => {
+  letters.forEach((letter, idx) => {
     const letterEl = document.createElement('div');
     letterEl.className = 'spelling-track-letter';
     letterEl.textContent = letter;
     letterEl.dataset.idx = idx;
     letterEl.dataset.letter = letter;
-    letterEl.style.pointerEvents = 'auto';
+    letterEl.style.pointerEvents = 'none';
     letterEl.addEventListener('click', () => handleSpellingLetterClick(letterEl, letter));
     spellingTrackLettersEl.appendChild(letterEl);
   });
-  const firstSlot = spellingSlots.querySelector('.spelling-slot');
-  if (firstSlot) {
-    firstSlot.classList.remove('empty');
-    firstSlot.classList.add('highlight');
-  }
-  if (srt) srt.style.display = 'flex';
-  if (robots.spelling) robots.spelling.onWaiting();
-  isSpellingAnswering = false;
-  updateSpellingUI();
-}, 4500);
+
+  // 1) Робот бежит по буквам
+  setTimeout(() => { if (myRun === spellingRunId) runSpellingRobot(); }, 600);
+
+  // 2) Пока бежит, буквы три раза перемешиваются (последний раз не равно слову)
+  [1100, 1700, 2300].forEach((t, i) => {
+    setTimeout(() => {
+      if (myRun !== spellingRunId) return;
+      shuffleLettersAnimated(spellingTrackLettersEl, i === 2 ? wordSnapshot : null);
+      playSound('correct');
+    }, t);
+  });
+
+  // 3) Робот убегает, слово скрывается, можно играть
+  setTimeout(() => {
+    if (myRun !== spellingRunId) return;
+    window.spellingStartTime = Date.now();
+    spellingWordShow.classList.add('hidden');
+    spellingIntroShown = true;
+
+    spellingTrackLettersEl.querySelectorAll('.spelling-track-letter').forEach(el => {
+      el.style.pointerEvents = 'auto';
+    });
+
+    const firstSlot = spellingSlots.querySelector('.spelling-slot');
+    if (firstSlot) {
+      firstSlot.classList.remove('empty');
+      firstSlot.classList.add('highlight');
+    }
+    if (srt) srt.style.display = 'flex';
+    if (robots.spelling) robots.spelling.onWaiting();
+    isSpellingAnswering = false;
+    updateSpellingUI();
+  }, 4800);
 }
 
 function handleSpellingLetterClick(letterEl, letter) {
