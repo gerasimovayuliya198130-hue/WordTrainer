@@ -484,27 +484,35 @@ body {
 @media (max-width: 768px) {
   /* Запрещаем вылезать за экран */
   html, body { max-width: 100vw; overflow-x: hidden; background-color: #f4f6f9 !important; }
-  
-  /* На телефоне убираем тяжелую фоновую картинку, чтобы не тормозило */
   body { background-image: none !important; }
 
-  /* ИГРА 1 (CLICK): Строго 2 колонки и мелкие картинки */
+  /* --- 1. ИГРА CLICK --- */
   .game-grid { 
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 колонки вместо 3 */
-    gap: 10px !important; 
+    grid-template-columns: repeat(3, 1fr) !important; /* Возвращаем 3 колонки, но с меньшими картинками */
+    gap: 8px !important; 
     padding: 0 10px !important;
   }
   .game-card { 
-    min-height: 100px !important; 
+    min-height: 85px !important; /* Уменьшили высоту карточки */
     padding: 5px !important; 
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
   .game-card img { 
-    width: 80px !important; 
-    height: 80px !important; 
+    width: 65px !important; /* Маленькие картинки, чтобы влезли в 3 колонки */
+    height: 65px !important; 
     max-width: 100% !important; 
   }
   
-  /* ИГРА 2 (DRAG): Картинки сверху, слова снизу, строго 2 колонки */
+  /* Центрируем слово по горизонтали и вертикали */
+  .game-word {
+    text-align: center !important;
+    margin: 0 auto 10px auto !important;
+    display: table !important;
+  }
+
+  /* --- 2. ИГРА DRAG --- */
   .drag-grid-container { 
     display: flex !important; 
     flex-direction: column !important; 
@@ -513,25 +521,63 @@ body {
   }
   .drag-left-area, .drag-right-area { 
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 колонки */
-    gap: 10px !important; 
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 колонки */
+    gap: 8px !important; 
   }
   
+  /* Фикс наложения: увеличиваем отступ снизу у карточек со словами */
   .drag-drop-item { 
-    padding-bottom: 25px !important; 
-    margin-bottom: 10px !important; 
+    padding-bottom: 30px !important; 
+    margin-bottom: 15px !important; 
   }
   
-  /* Надпись под картинкой в Drag */
+  /* Надписи под картинками в Drag */
   .drag-drop-item .word-label { 
-    font-size: 12px !important; 
-    bottom: -20px !important; 
-    padding: 2px 6px !important; 
+    font-size: 10px !important; 
+    bottom: -18px !important; 
+    padding: 1px 4px !important; 
+  }
+  .drag-image-item img, .drag-drop-item img { width: 60px !important; height: 60px !important; object-fit: contain !important;}
+
+  /* --- 3. ЭКРАН ИЗУЧЕНИЯ (Learn) --- */
+  .learn-grid { 
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 8px !important; 
+  }
+  .learn-card img { 
+    width: 60px !important; 
+    height: 60px !important; 
+    margin: 0 auto !important;
+  }
+  /* Иконка перевода в правом верхнем углу картинки */
+  .learn-card .translate-btn { 
+    width: 22px !important; 
+    height: 22px !important; 
+    top: 2px !important; 
+    right: 2px !important; 
   }
 
-  /* ШАПКА: Всё в одну строку */
+  /* --- 4. ЭКРАН ВЫБОРА ТЕМ (Choose) --- */
+  .theme-grid { 
+    grid-template-columns: repeat(2, 1fr) !important; /* 2x2 или 2xN для красоты */
+    gap: 10px !important; 
+    padding: 10px !important;
+  }
+  .choose-box h2 { 
+    font-size: 22px !important; 
+    margin-top: 5px !important;
+  }
+  .choose-back-wrap { 
+    top: 15px !important; 
+    left: 15px !important; 
+  }
+  .choose-back-wrap .btn-back-game img { 
+    width: 35px !important; 
+    height: 35px !important; 
+  }
+
+  /* --- 5. ШАПКА (в одну строку) --- */
   .score-block, .timer-container { margin: 0 !important; }
-  
   .game-header, .drag-header, .choose-game-header, .spelling-header, .writing-header {
     flex-direction: row !important;
     align-items: center !important;
@@ -540,33 +586,28 @@ body {
     padding: 5px 10px !important;
     gap: 5px !important;
   }
-
   .game-header-robot, .drag-robot, .choose-game-robot, .spelling-header-robot, .writing-header-robot {
     position: static !important;
     transform: none !important;
     margin: 0 !important;
-    width: 50px !important;
-    height: 60px !important;
+    width: 40px !important;
+    height: 50px !important;
   }
-
   .game-header-left, .drag-header-left, .choose-game-header-left, .spelling-header-left, .writing-header-left,
   .game-header-right, .drag-header-right, .choose-game-header-right, .spelling-header-right, .writing-header-right {
     display: flex !important;
     align-items: center !important;
     gap: 5px !important;
   }
-
   .btn-back-game img, .btn-sound img { width: 30px !important; height: 30px !important; }
-  .timer-svg { width: 40px !important; height: 40px !important; }
+  .timer-svg { width: 35px !important; height: 35px !important; }
   .timer-text { font-size: 12px !important; }
   .score-value { font-size: 20px !important; }
   .score-label { font-size: 10px !important; }
 
-  /* Остальные экраны */
+  /* --- Прочее --- */
   .learn-actions { flex-direction: column !important; }
   .learn-actions .btn { width: 100% !important; }
-  .learn-card, .theme-card { min-height: 90px !important; padding: 5px !important; }
-  .learn-card img, .theme-card img { width: 70px !important; height: 70px !important; }
   .choose-game-area { flex-direction: column !important; }
   .choose-game-image { flex: 0 0 120px !important; max-width: 120px !important; }
   .writing-input-wrap { flex-direction: column !important; }
