@@ -1905,6 +1905,7 @@ let dragBatchIndex = 0;
 let dragPlacedCount = 0;
 let dragItemStatus = [];
 let dragItemsData = [];
+let dragLocked = false;
 
 let chooseWords = [];
 let chooseIndex = 0;
@@ -2575,6 +2576,8 @@ startDragTimer();
 
 function handleDragDropResult(draggedElement, dropZone, draggedIdx, isCorrect, hasShift) {
 if (isGameOver) return;
+if (dragLocked) return;
+dragLocked = true;
 stopDragTimer();
 const elapsed = (Date.now() - dragWordStartTime) / 1000;
 aiUpdateWeight(currentTheme, dropZone.dataset.word, isCorrect ? 'correct' : 'wrong', elapsed);
@@ -2610,6 +2613,7 @@ dragProgress.style.width = dragProgressPct + '%';
 const isLastBatch = (dragPlacedCount >= WORDS_PER_PHASE - 1);
 const delay = isLastBatch ? 2200 : 800;
 setTimeout(() => {
+    dragLocked = false;
     const allFilled = dragItemStatus.every(s => s === true);
     if (allFilled) {
         dragBatchIndex += dragCurrentBatch.length;
@@ -2634,6 +2638,7 @@ setTimeout(() => {
 
 // ==================== ИГРА 3: CHOOSE ====================
 function startChooseGame(isRetry) {
+if (!isRetry && gamePhase === 3 && chooseGameOverlay.classList.contains('active')) return;
 if (isRetry) gameScore = phaseStartScore[3] || 0; else phaseStartScore[3] = gameScore;
 const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
 chooseWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
@@ -3316,7 +3321,7 @@ if (gameScore > 0) learnedWords = Math.max(learnedWords, gameScore);
 updateFooter();
 spellingRunId++;
 chooseRenderToken++;
-
+dragLocked = false;
 }
 if (learnBackBtn) learnBackBtn.addEventListener('click', goToMenu);
 if (gameBackBtn) gameBackBtn.addEventListener('click', goToMenu);
