@@ -481,230 +481,55 @@ body {
 }
 
 /* Адаптация ТОЛЬКО для телефонов */
-@media (max-width: 768px) {
-  /* Запрещаем вылезать за экран */
-  html, body { max-width: 100vw; overflow-x: hidden; background-color: #f4f6f9 !important; }
-  body { background-image: none !important; }
-
-  /* --- 1. ИГРА CLICK --- */
-  .game-grid { 
-    grid-template-columns: repeat(3, 1fr) !important; 
-    gap: 8px !important; 
-    padding: 0 5px !important;
-  }
-  .game-card { 
-    min-height: 80px !important; 
-    padding: 5px !important; 
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-  .game-card img { 
-    width: 60px !important; 
-    height: 60px !important; 
-    max-width: 100% !important; 
-  }
-  .game-word {
-    font-size: 28px !important;
-    text-align: center !important;
-    margin: 0 auto 10px auto !important;
-    display: table !important;
-    padding: 5px 20px !important;
-  }
-
-  /* --- 2. ИГРА DRAG (ИСПРАВЛЕНО СМЕЩЕНИЕ) --- */
-  .drag-grid-container { 
-    display: flex !important; 
-    flex-direction: column !important; 
-    gap: 15px !important; 
-    margin-top: 10px !important;
-  }
-  .drag-left-area, .drag-right-area { 
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important; 
-    gap: 8px !important; 
-    padding-bottom: 10px !important;
-    justify-items: center !important; /* Центрируем элементы в сетке */
-  }
-  
-  .drag-image-item, .drag-drop-item {
-    width: 100% !important;
-    aspect-ratio: 1/1 !important;
-    max-width: 90px !important; /* Чуть уменьшил, чтобы влезало ровно */
-    margin: 0 auto 15px auto !important; /* Центрируем и даем место снизу */
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-
-  .drag-image-item img, .drag-drop-item img { 
-    width: 80% !important; 
-    height: 80% !important; 
-    object-fit: contain !important;
-  }
-
-  .drag-drop-item .word-label { 
-    font-size: 10px !important; 
-    bottom: -20px !important; 
-    padding: 2px 4px !important;
-    white-space: normal !important;
-    text-align: center !important;
-    width: 100% !important;
-    line-height: 1.1 !important;
-  }
-  
-  /* Убираем класс сдвига, который ломал сетку */
-  .drag-item-shift {
-    margin-top: 0 !important;
-    transform: none !important;
-  }
-
-  /* --- 3. ЭКРАН ИЗУЧЕНИЯ (Learn) --- */
-  .learn-grid { 
-    grid-template-columns: repeat(3, 1fr) !important; 
-    gap: 8px !important; 
-  }
-  .learn-card { 
-    padding: 5px !important; 
-    min-height: 90px !important;
-    position: relative !important;
-  }
-  .learn-card img { 
-    width: 60px !important; 
-    height: 60px !important; 
-    margin: 0 auto !important;
-  }
-  
-  /* Кнопка перевода: МАЛЕНЬКАЯ И В УГЛУ */
-  .learn-card .translate-btn { 
-    width: 16px !important; 
-    height: 16px !important; 
-    top: 4px !important; 
-    right: 4px !important; 
-    position: absolute !important;
-    z-index: 10 !important;
-  }
-  .learn-card .translate-btn img {
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  /* --- 4. ЭКРАН ВЫБОРА ТЕМ (Choose) --- */
-  .theme-grid { 
-    grid-template-columns: repeat(2, 1fr) !important; 
-    gap: 10px !important; 
-    padding: 10px !important;
-  }
-  .choose-box h2 { 
-    font-size: 22px !important; 
-    margin-top: 5px !important;
-  }
-
-  /* --- 5. ЭКРАН ВЫБОРА (Choose Game) - ОДИНАКОВЫЕ КНОПКИ --- */
-  .choose-game-area { 
-    display: flex !important;
-    flex-direction: column !important; 
-    gap: 15px !important;
-    padding: 0 5px !important;
-  }
-  
-  .choose-game-image { 
-    flex: 0 0 120px !important; 
-    max-width: 120px !important; 
-    margin: 0 auto !important;
-  }
-  .choose-game-image img {
-    width: 80% !important;
-    height: 80% !important;
-  }
-
-  .choose-game-options { 
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  
-  /* Одинаковый размер кнопок */
-  .choose-game-option { 
-    padding: 10px 5px !important; 
-    font-size: 16px !important; 
-    height: 60px !important; /* Фиксированная высота */
-    margin: 0 !important;
-    width: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-    word-break: break-word !important;
-    line-height: 1.1 !important;
-  }
-
   /* --- 6. ИГРА SPELLING (4 игра) - КВАДРАТНЫЕ ЯЧЕЙКИ И ПЕРЕНОС --- */
   .spelling-slots {
     display: flex !important;
     flex-wrap: wrap !important; /* Разрешаем перенос на новую строку */
     justify-content: center !important;
-    gap: 6px !important;
+    align-items: center !important;
+    gap: 8px !important; /* Чуть больше отступ */
     margin: 10px 0 !important;
+    padding: 0 5px !important;
+    width: 100% !important;
   }
   
   .spelling-slot {
-    width: 45px !important; /* Чуть больше */
-    height: 45px !important; /* Строго квадратные */
-    font-size: 24px !important; /* Крупные буквы */
-    border-radius: 10px !important;
+    width: 50px !important; /* Увеличили размер */
+    height: 50px !important; /* Строго квадратные */
+    font-size: 28px !important; /* Крупные буквы */
+    border-radius: 12px !important;
     padding: 0 !important;
-    flex-shrink: 0 !important;
+    flex-shrink: 0 !important; /* Запрещаем сжиматься */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   /* Буквы в треке (откуда берем) тоже делаем крупнее и квадратнее */
   .spelling-track {
-    height: 120px !important; /* Чуть увеличим высоту трека */
-  }
-  .spelling-track-letter { 
-    width: 45px !important; 
-    height: 45px !important; 
-    font-size: 24px !important; 
-    border-radius: 10px !important;
-  }
-
-  /* --- 7. ШАПКА (в одну строку) --- */
-  .score-block, .timer-container { margin: 0 !important; }
-  .game-header, .drag-header, .choose-game-header, .spelling-header, .writing-header {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    min-height: auto !important;
-    padding: 5px 5px !important;
-    gap: 2px !important;
-  }
-  .game-header-robot, .drag-robot, .choose-game-robot, .spelling-header-robot, .writing-header-robot {
-    position: static !important;
-    transform: none !important;
-    margin: 0 !important;
-    width: 40px !important;
-    height: 50px !important;
-  }
-  .game-header-left, .drag-header-left, .choose-game-header-left, .spelling-header-left, .writing-header-left,
-  .game-header-right, .drag-header-right, .choose-game-header-right, .spelling-header-right, .writing-header-right {
+    height: 130px !important; /* Увеличили высоту трека, чтобы влезали буквы */
+    padding: 10px 0 !important;
     display: flex !important;
+    flex-wrap: wrap !important; /* Буквы в треке тоже переносятся */
+    justify-content: center !important;
     align-items: center !important;
-    gap: 2px !important;
+    gap: 8px !important;
   }
-  .btn-back-game img, .btn-sound img { width: 28px !important; height: 28px !important; }
-  .timer-svg { width: 35px !important; height: 35px !important; }
-  .timer-text { font-size: 12px !important; }
-  .score-value { font-size: 20px !important; }
-  .score-label { font-size: 9px !important; }
+  
+  .spelling-track-letter { 
+    width: 50px !important; 
+    height: 50px !important; 
+    font-size: 28px !important; 
+    border-radius: 12px !important;
+    flex-shrink: 0 !important;
+  }
 
-  /* --- Прочее --- */
-  .learn-actions { flex-direction: column !important; }
-  .learn-actions .btn { width: 100% !important; margin-bottom: 5px !important; }
-  .writing-input-wrap { flex-direction: column !important; }
-  .writing-submit-btn { width: 100% !important; }
-}
+
+
+
+
+
+
 </style>
 </head>
 <body>
