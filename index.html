@@ -281,7 +281,7 @@ body {
 .choose-game-robot { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 120px; height: 130px; display: flex; justify-content: center; align-items: center; z-index: 3; }
 .choose-game-area { display: flex; gap: 40px; flex: 1; align-items: center; justify-content: center; padding: 10px 0; min-height: 0; }
 .choose-game-image { flex: 0 0 280px; max-width: 280px; aspect-ratio: 1/1; background: rgba(255,255,255,0.9); border-radius: 30px; border: 4px solid #ddd; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-.choose-game-image img { width: 85%; height: 85%; object-fit: contain; border-radius: 16px; background: transparent; }
+.choose-game-image img { width: 85%; height: 85%; object-fit: contain; border-radius: 16px; background: transparent; transition: opacity 0.15s ease; }
 .choose-game-options { flex: 1; display: flex; flex-direction: column; gap: 14px; max-width: 320px; }
 .choose-game-option { background: rgba(255,255,255,0.8); border-radius: 20px; padding: 16px 24px; cursor: pointer; transition: all 0.3s ease; border: 4px solid transparent; text-align: center; font-size: 24px; font-weight: 700; color: #1a1a2e; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; min-height: 60px; width: 100%; letter-spacing: 1px; }
 .choose-game-option:hover { background: rgba(52,152,219,0.12); transform: translateY(-2px) scale(1.02); border-color: rgba(52,152,219,0.3); box-shadow: 0 8px 25px rgba(52,152,219,0.15); }
@@ -664,23 +664,36 @@ body {
     line-height: 1.1 !important;
   }
 
-     /* --- 6. ИГРА SPELLING --- */
+       /* --- 6. ИГРА SPELLING --- */
   .spelling-overlay {
     padding: 10px !important;
-    align-items: center !important; /* Вот это ставит окно по центру */
-    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    /* ВАЖНО: здесь больше нет display: flex !important */
   }
 
-    .spelling-box {
-    overflow: visible !important;
+  .spelling-box {
+    overflow-y: auto !important;
     padding: 20px 15px !important;
     border-radius: 30px !important;
-    width: 100% !important;
-    max-height: 95vh !important; 
-    min-height: 500px !important; /* Делает коробку большой */
+    width: 95% !important;
+    max-height: 90vh !important;
+    min-height: 0 !important; /* Убираем жесткую высоту */
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important; 
+    justify-content: flex-start !important;
+    background: #ffffff !important;
+    position: relative !important;
+    margin: 0 auto !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+  }
+
+    .game-box, .drag-box, .choose-game-box, .writing-box, .learn-box, .choose-box {
+    max-height: 92vh !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    border-radius: 30px !important;
+    padding: 15px 12px !important;
   }
 
   .spelling-slots {
@@ -691,10 +704,11 @@ body {
     gap: 8px !important;
     margin: 15px 0 !important;
     padding: 0 !important;
+    flex-shrink: 0 !important;
   }
 
   .spelling-slot {
-    width: 36px !important; /* Крупные слоты */
+    width: 36px !important;
     height: 44px !important;
     font-size: 22px !important;
     border-radius: 9px !important;
@@ -715,7 +729,8 @@ body {
     border-radius: 20px !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    background: #f0f4f8 !important; /* Легкий фон для трека */
+    background: #f0f4f8 !important;
+    flex-shrink: 0 !important;
   }
 
   .spelling-track-letters {
@@ -730,7 +745,7 @@ body {
   }
 
   .spelling-track-letter {
-    width: 38px !important; /* Крупные буквы */
+    width: 38px !important;
     height: 38px !important;
     font-size: 22px !important;
     border-radius: 9px !important;
@@ -2007,6 +2022,8 @@ let currentWords = [];
 let currentSessionWords = [];
 const SESSION_WORDS_COUNT = 12;
 
+let spellingRunId = 0;
+
 // ==================== РОБОТЫ ====================
 let robots = {};
 function initRobots() {
@@ -2507,7 +2524,7 @@ this.classList.add('dragging');
 e.dataTransfer.effectAllowed = 'copy';
 e.dataTransfer.setData('text/plain', this.dataset.word);
 e.dataTransfer.setData('source-idx', this.dataset.idx);
-gameIndex = dragPlacedCount + startIdx + idx;
+
 });
 imageItem.addEventListener('dragend', function(e) { this.classList.remove('dragging'); });
 });
@@ -2580,7 +2597,7 @@ dragItemStatus[draggedIdx] = true;
 speakWord(draggedElement.dataset.word);
 speakPraise(elapsed);
 dragPlacedCount++;
-gameIndex = dragPlacedCount - 1;
+gameIndex = dragPlacedCount;
 const globalTaskNumber = getGlobalTaskNumber();
 dragProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
 dragScoreDisplay.textContent = gameScore;
@@ -2637,42 +2654,57 @@ chooseGameProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
 showChooseWord();
 }
 
+let chooseRenderToken = 0;
+
 function showChooseWord() {
-if (isGameOver) return;
-if (chooseIndex >= chooseWords.length) { startSpellingGame(); return; }
-const item = chooseWords[chooseIndex];
-chooseGameImg.src = 'картинки/' + currentTheme + '/' + item.img;
-chooseGameImg.alt = item.word;
-animateRobot('neutral', 3);
+  if (isGameOver) return;
+  if (chooseIndex >= chooseWords.length) { startSpellingGame(); return; }
 
-// Берем ВСЕ слова из текущей темы (и только из нее)
-const themeWords = WORDS_BY_THEME[currentTheme] || [];
-let options = [item.word];
-const usedWords = new Set([item.word]);
+  const item = chooseWords[chooseIndex];
+  const myToken = ++chooseRenderToken;
+  const imgSrc = 'картинки/' + currentTheme + '/' + item.img;
 
-// Перемешиваем слова текущей темы и берем из них 3 непохожих варианта
-const shuffledThemeWords = shuffle([...themeWords]);
-for (let i = 0; i < shuffledThemeWords.length && options.length < 4; i++) {
-    if (usedWords.has(shuffledThemeWords[i].word) === false) {
+  chooseGameImg.style.opacity = '0';
+  chooseGameOptions.innerHTML = '';
+  stopTimer();
+  animateRobot('neutral', 3);
+
+  const loader = new Image();
+  const proceed = function () {
+    if (myToken !== chooseRenderToken || isGameOver) return;
+    chooseGameImg.src = imgSrc;
+    chooseGameImg.alt = item.word;
+    chooseGameImg.style.opacity = '1';
+
+    const themeWords = WORDS_BY_THEME[currentTheme] || [];
+    const options = [item.word];
+    const used = new Set([item.word]);
+    const shuffledThemeWords = shuffle([...themeWords]);
+    for (let i = 0; i < shuffledThemeWords.length && options.length < 4; i++) {
+      if (!used.has(shuffledThemeWords[i].word)) {
         options.push(shuffledThemeWords[i].word);
-        usedWords.add(shuffledThemeWords[i].word);
+        used.add(shuffledThemeWords[i].word);
+      }
     }
+
+    chooseGameOptions.innerHTML = '';
+    shuffle([...options]).forEach(optWord => {
+      const option = document.createElement('div');
+      option.className = 'choose-game-option';
+      option.textContent = optWord;
+      option.addEventListener('click', () => handleChooseGameClick(option, optWord, item.word));
+      chooseGameOptions.appendChild(option);
+    });
+
+    updateChooseUI();
+    isAnswering = false;
+    startTimer();
+  };
+  loader.onload = proceed;
+  loader.onerror = proceed;
+  loader.src = imgSrc;
 }
 
-// Перемешиваем и выводим
-const shuffledOptions = shuffle([...options]);
-chooseGameOptions.innerHTML = '';
-shuffledOptions.forEach(optWord => {
-    const option = document.createElement('div');
-    option.className = 'choose-game-option';
-    option.textContent = optWord;
-    option.addEventListener('click', () => handleChooseGameClick(option, optWord, item.word));
-    chooseGameOptions.appendChild(option);
-});
-
-isAnswering = false;
-startTimer();
-}
 
 function handleChooseGameClick(option, selected, correct) {
 if (isAnswering || isGameOver) return;
@@ -2698,7 +2730,7 @@ const isLastWord = (chooseIndex + 1 >= chooseWords.length);
 const delay = isLastWord ? 2200 : 700;
 setTimeout(() => {
 chooseIndex++;
-gameIndex = chooseIndex - 1;
+gameIndex = chooseIndex;
 document.querySelectorAll('.choose-game-option').forEach(o => o.classList.remove('disabled'));
 showChooseWord();
 updateChooseUI();
@@ -2752,7 +2784,9 @@ function startSpellingGame() {
 const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
 spellingWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
 spellingIndex = 0;
-spellingScore = 0;
+if (phaseStartScore[4] === undefined || !arguments[0]) phaseStartScore[4] = gameScore;
+else gameScore = phaseStartScore[4];
+spellingScore = gameScore;
 gamePhase = 4;
 gameIndex = 0;
 isSpellingGameOver = false;
@@ -2777,6 +2811,7 @@ showSpellingIntro();
 function showSpellingIntro() {
 if (isSpellingGameOver) return;
 if (spellingIndex >= spellingWords.length) { showSpellingComplete(); return; }
+const myRun = ++spellingRunId;
 const globalTaskNumber = getGlobalTaskNumber();
 spellingProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
 const item = spellingWords[spellingIndex];
@@ -2812,40 +2847,40 @@ letterEl.dataset.letter = letter;
 letterEl.style.pointerEvents = 'none';
 spellingTrackLettersEl.appendChild(letterEl);
 });
-setTimeout(() => { runSpellingRobot(); }, 600);
 setTimeout(() => {
- window.spellingStartTime = Date.now(); 
-spellingWordShow.classList.add('hidden');
-spellingIntroShown = true;
-let shuffledLetters;
-let attempts = 0;
-do {
-shuffledLetters = shuffle([...letters]);
-attempts++;
-const isSameOrder = shuffledLetters.every((letter, idx) => letter === letters[idx]);
-if (isSameOrder === false) break;
-if (attempts > 10) break;
-} while (true);
-spellingTrackLettersEl.innerHTML = '';
-shuffledLetters.forEach((letter, idx) => {
-const letterEl = document.createElement('div');
-letterEl.className = 'spelling-track-letter';
-letterEl.textContent = letter;
-letterEl.dataset.idx = idx;
-letterEl.dataset.letter = letter;
-letterEl.style.pointerEvents = 'auto';
-letterEl.addEventListener('click', () => handleSpellingLetterClick(letterEl, letter));
-spellingTrackLettersEl.appendChild(letterEl);
-});
-const firstSlot = spellingSlots.querySelector('.spelling-slot');
-if (firstSlot) {
-firstSlot.classList.remove('empty');
-firstSlot.classList.add('highlight');
-}
-if (srt) srt.style.display = 'flex';
-if (robots.spelling) robots.spelling.onWaiting();
-isSpellingAnswering = false;
-updateSpellingUI();
+  if (myRun !== spellingRunId) return;   // ← добавь эту строку
+  window.spellingStartTime = Date.now(); 
+  spellingWordShow.classList.add('hidden');
+  spellingIntroShown = true;
+  let shuffledLetters;
+  let attempts = 0;
+  do {
+    shuffledLetters = shuffle([...letters]);
+    attempts++;
+    const isSameOrder = shuffledLetters.every((letter, idx) => letter === letters[idx]);
+    if (isSameOrder === false) break;
+    if (attempts > 10) break;
+  } while (true);
+  spellingTrackLettersEl.innerHTML = '';
+  shuffledLetters.forEach((letter, idx) => {
+    const letterEl = document.createElement('div');
+    letterEl.className = 'spelling-track-letter';
+    letterEl.textContent = letter;
+    letterEl.dataset.idx = idx;
+    letterEl.dataset.letter = letter;
+    letterEl.style.pointerEvents = 'auto';
+    letterEl.addEventListener('click', () => handleSpellingLetterClick(letterEl, letter));
+    spellingTrackLettersEl.appendChild(letterEl);
+  });
+  const firstSlot = spellingSlots.querySelector('.spelling-slot');
+  if (firstSlot) {
+    firstSlot.classList.remove('empty');
+    firstSlot.classList.add('highlight');
+  }
+  if (srt) srt.style.display = 'flex';
+  if (robots.spelling) robots.spelling.onWaiting();
+  isSpellingAnswering = false;
+  updateSpellingUI();
 }, 4500);
 }
 
@@ -2907,7 +2942,7 @@ aiUpdateWeight(currentTheme, currentWord, aiResult, elapsedSpelling);
 
     setTimeout(() => {
         spellingIndex++;
-        gameIndex = spellingIndex - 1;
+gameIndex = spellingIndex;
         spellingIntroShown = false;
         robotRanOnce = false;
         spellingHadMistakes = false;
@@ -3202,7 +3237,7 @@ gameoverRetryBtn.addEventListener('click', function() {
     gameoverOverlay.classList.remove('active');
     if (gamePhase === 2) startDragGame(true);
     else if (gamePhase === 3) startChooseGame(true);
-    else if (gamePhase === 4) startSpellingGame();
+    else if (gamePhase === 4) startSpellingGame(true);
     else if (gamePhase === 5) startWritingGame();
     else startClickGame(true);
 });
@@ -3235,6 +3270,9 @@ learnOverlay.classList.remove('active');
 gameoverOverlay.classList.remove('active');
 if (gameScore > 0) learnedWords = Math.max(learnedWords, gameScore);
 updateFooter();
+spellingRunId++;
+chooseRenderToken++;
+
 }
 if (learnBackBtn) learnBackBtn.addEventListener('click', goToMenu);
 if (gameBackBtn) gameBackBtn.addEventListener('click', goToMenu);
