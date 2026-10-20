@@ -650,52 +650,68 @@ body {
   }
 
   /* --- 6. ИГРА SPELLING --- */
-  .spelling-slots {
+    .spelling-slots {
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 8px !important;
-    margin: 10px 0 !important;
-    padding: 0 5px !important;
+    gap: 6px !important;
+    margin: 8px 0 !important;
+    padding: 0 4px !important;
     width: 100% !important;
   }
   
-  .spelling-slot {
-    width: 45px !important; /* Чуть уменьшили, чтобы влезало больше */
-    height: 45px !important;
-    font-size: 24px !important;
-    border-radius: 10px !important;
+    
+    .spelling-slot {
+    width: 30px !important;
+    height: 34px !important;
+    font-size: 17px !important;
+    border-radius: 7px !important;
     padding: 0 !important;
     flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
   }
-
+  
   /* ИСПРАВЛЕНИЕ: Трек с буквами теперь растягивается */
-    .spelling-track {
-    height: auto !important;            /* Высота подстраивается под контент */
-    min-height: 100px !important; 
-    padding: 15px 5px !important;
+           .spelling-track {
+    height: auto !important;
+    min-height: 80px !important;
+    padding: 10px 6px !important;
     display: flex !important;
-    flex-wrap: wrap !important;         /* Буквы переносятся на новую строку */
+    flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 10px !important;
-    overflow: visible !important;       /* Ничего не обрезается */
+    gap: 5px !important;
+    overflow: visible !important;
     border-radius: 20px !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
   }
   
-  .spelling-track-letter { 
-    width: 50px !important; 
-    height: 50px !important; 
-    font-size: 28px !important; 
-    border-radius: 12px !important;
+    .spelling-track-letter { 
+    width: 30px !important; 
+    height: 30px !important; 
+    font-size: 18px !important; 
+    border-radius: 7px !important;
     flex-shrink: 0 !important;
     position: static !important;
   }
 
+           .spelling-track-letters {
+    position: static !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 4px 6px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
   /* --- 7. ШАПКА --- */
   .score-block, .timer-container { margin: 0 !important; }
   .game-header, .drag-header, .choose-game-header, .spelling-header, .writing-header {
@@ -731,6 +747,11 @@ body {
   .writing-input-wrap { flex-direction: column !important; }
   .writing-submit-btn { width: 100% !important; }
 }
+
+@media (max-width: 400px) {
+  .spelling-track-letter { width: 28px !important; height: 28px !important; font-size: 16px !important; }
+  .spelling-slot { width: 26px !important; height: 32px !important; font-size: 15px !important; }
+}
 </style>
 
 
@@ -739,7 +760,7 @@ body {
 
 
 
-</style>
+
 </head>
 <body>
 
