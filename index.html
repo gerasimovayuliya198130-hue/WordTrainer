@@ -471,53 +471,81 @@ body {
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modalPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-
-/* ====== 17. БЕЛАЯ ТЕМА И АДАПТАЦИЯ ====== */
+/* ====== 16. БЕЛАЯ ТЕМА И УМНАЯ АДАПТАЦИЯ ====== */
 body {
   background-image: none !important;
   background-color: #f4f6f9 !important;
 }
 
+/* Делаем все окна непрозрачно белыми */
 .menu-overlay, .choose-box, .learn-box, .game-box, .drag-box, 
-.choose-game-box, .spelling-box, .writing-box, .gameover-box, .complete-box {
+.choose-game-box, .spelling-box, .writing-box, .gameover-box, .complete-box,
+.ai-modal-box, .reset-modal-box {
   background: #ffffff !important;
   box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
 }
 
+/* АДАПТАЦИЯ ТОЛЬКО ДЛЯ ТЕЛЕФОНОВ (до 768px) */
 @media (max-width: 768px) {
-  /* Разделяем картинки и слова */
+  /* ФИКС ДЛЯ DRAG: разделяем картинки и слова */
   .drag-grid-container { 
     display: flex !important; 
     flex-direction: column !important; 
     gap: 20px !important; 
+    overflow-y: visible !important;
+    max-height: none !important;
   }
   .drag-left-area { 
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 10px !important; 
-    border-bottom: 2px dashed #ccc !important;
+    margin-bottom: 20px !important;
     padding-bottom: 20px !important;
+    border-bottom: 2px dashed #ccc !important;
   }
   .drag-right-area { 
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 10px !important; 
+    margin-bottom: 20px !important;
   }
   .drag-image-item, .drag-drop-item { 
     max-width: 100% !important; 
     aspect-ratio: 1/1 !important;
   }
   .drag-item-shift { margin-top: 0 !important; }
+
+  /* Убираем фиксированные отступы у счетов и таймеров */
+  .score-block, .timer-container { margin: 0 !important; }
   
-  /* Остальные адаптации */
-  .learn-actions { flex-direction: column; }
-  .learn-actions .btn { width: 100%; }
+  /* Робота ставим в центр шапки */
   .game-header-robot, .drag-robot, .choose-game-robot, .spelling-header-robot, .writing-header-robot {
-    position: static; transform: none; margin: 0 auto;
+    position: static !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    width: 80px !important;
+    height: 90px !important;
   }
-  .game-header, .drag-header, .choose-game-header {
-    flex-direction: column; align-items: center;
+  
+  .game-header, .drag-header, .choose-game-header, .spelling-header, .writing-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    min-height: auto !important;
   }
+
+  /* Кнопки PLAY/CHOOSE/WRITE ставим в столбик */
+  .learn-actions { flex-direction: column !important; }
+  .learn-actions .btn { width: 100% !important; }
+
+  /* Остальные мелочи для телефона */
+  .game-card img { width: 90px; height: 90px; }
+  .learn-card img, .theme-card img { width: 80px; height: 80px; }
+  .choose-game-area { flex-direction: column !important; }
+  .choose-game-image { flex: 0 0 150px !important; max-width: 150px !important; }
+  .writing-input-wrap { flex-direction: column !important; }
+  .writing-submit-btn { width: 100% !important; }
+  .spelling-slot { width: 45px; height: 50px; font-size: 24px; }
+  .spelling-track-letter { width: 45px; height: 45px; font-size: 24px; }
 }
 </style>
 </head>
@@ -2233,28 +2261,12 @@ img.draggable = false;
 imageItem.appendChild(img);
 dragLeftArea.appendChild(imageItem);
 imageItem.addEventListener('dragstart', function(e) {
-    if (isGameOver || this.classList.contains('placed')) { e.preventDefault(); return; }
-    this.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'copy';
-    e.dataTransfer.setData('text/plain', this.dataset.word);
-    e.dataTransfer.setData('source-idx', this.dataset.idx);
-    gameIndex = dragPlacedCount + startIdx + idx;
-});
-
-imageItem.addEventListener('click', function(e) {
-    if (isGameOver || this.classList.contains('placed')) return;
-    // Снимаем выделение со всех остальных картинок
-    dragLeftArea.querySelectorAll('.drag-image-item').forEach(el => {
-        el.style.borderColor = '#ddd'; // Возвращаем стандартную рамку
-        el.style.transform = 'none';
-    });
-    // Подсвечиваем выбранную
-    this.style.borderColor = '#3498db';
-    this.style.transform = 'scale(1.05)';
-    // Запоминаем выбор
-    window.touchSelectedWord = this.dataset.word;
-    window.touchSelectedIdx = this.dataset.idx;
-    window.touchSelectedEl = this;
+if (isGameOver || this.classList.contains('placed')) { e.preventDefault(); return; }
+this.classList.add('dragging');
+e.dataTransfer.effectAllowed = 'copy';
+e.dataTransfer.setData('text/plain', this.dataset.word);
+e.dataTransfer.setData('source-idx', this.dataset.idx);
+gameIndex = dragPlacedCount + startIdx + idx;
 });
 imageItem.addEventListener('dragend', function(e) { this.classList.remove('dragging'); });
 });
@@ -2271,40 +2283,11 @@ wordLabel.className = 'word-label';
 wordLabel.textContent = item.word;
 dropItem.appendChild(wordLabel);
 dragRightArea.appendChild(dropItem);
-
 dropItem.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-    if (isGameOver === false && this.classList.contains('filled') === false) this.classList.add('drag-over');
+e.preventDefault();
+e.dataTransfer.dropEffect = 'copy';
+if (isGameOver === false && this.classList.contains('filled') === false) this.classList.add('drag-over');
 });
-
-dropItem.addEventListener('click', function(e) {
-    if (isGameOver || this.classList.contains('filled')) return;
-    
-    // Если картинка не выбрана, ничего не делаем
-    if (!window.touchSelectedWord) return;
-    
-    const draggedWord = window.touchSelectedWord;
-    const sourceIdx = window.touchSelectedIdx;
-    const targetWord = this.dataset.word;
-    const draggedElement = window.touchSelectedEl;
-    const hasShift = this.classList.contains('drag-item-shift');
-    const isCorrect = (draggedWord === targetWord);
-    
-    // Сбрасываем выбор после клика
-    window.touchSelectedWord = null;
-    window.touchSelectedIdx = null;
-    window.touchSelectedEl = null;
-    // Снимаем подсветку с картинки
-    if (draggedElement) {
-        draggedElement.style.borderColor = '#ddd';
-        draggedElement.style.transform = 'none';
-    }
-    
-    // Запускаем проверку
-    handleDragDropResult(draggedElement, this, sourceIdx, isCorrect, hasShift);
-});
-
 dropItem.addEventListener('dragleave', function(e) { this.classList.remove('drag-over'); });
 dropItem.addEventListener('drop', function(e) {
 e.preventDefault();
@@ -3282,96 +3265,6 @@ window.addEventListener('resize', function() { if (chooseOverlay.classList.conta
 initRobots();
 updateFooter();
 renderThemePage();
-// ==================== ПЕРЕТАСКИВАНИЕ ПАЛЬЦЕМ ДЛЯ ТЕЛЕФОНОВ ====================
-let touchDragElement = null;
-let touchDragWord = null;
-let touchDragSourceIdx = null;
-let touchDragOffsetX = 0;
-let touchDragOffsetY = 0;
-
-function initTouchDrag() {
-    document.addEventListener('touchstart', function(e) {
-        const imgItem = e.target.closest('.drag-image-item');
-        if (!imgItem || imgItem.classList.contains('placed')) return;
-        if (e.touches.length > 1) return;
-
-        const touch = e.touches[0];
-        const rect = imgItem.getBoundingClientRect();
-
-        touchDragElement = imgItem.cloneNode(true);
-        touchDragElement.style.position = 'fixed';
-        touchDragElement.style.zIndex = '9999';
-        touchDragElement.style.width = rect.width + 'px';
-        touchDragElement.style.height = rect.height + 'px';
-        touchDragElement.style.pointerEvents = 'none';
-        touchDragElement.style.opacity = '0.9';
-        touchDragElement.style.transform = 'scale(1.1)';
-        touchDragElement.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
-        
-        touchDragOffsetX = touch.clientX - rect.left;
-        touchDragOffsetY = touch.clientY - rect.top;
-
-        touchDragElement.style.left = (touch.clientX - touchDragOffsetX) + 'px';
-        touchDragElement.style.top = (touch.clientY - touchDragOffsetY) + 'px';
-        
-        document.body.appendChild(touchDragElement);
-        imgItem.style.opacity = '0.3';
-
-        touchDragWord = imgItem.dataset.word;
-        touchDragSourceIdx = imgItem.dataset.idx;
-        
-        e.preventDefault();
-    }, { passive: false });
-
-    document.addEventListener('touchmove', function(e) {
-        if (!touchDragElement) return;
-        const touch = e.touches[0];
-        
-        touchDragElement.style.left = (touch.clientX - touchDragOffsetX) + 'px';
-        touchDragElement.style.top = (touch.clientY - touchDragOffsetY) + 'px';
-
-        const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-        const dropItem = elemBelow ? elemBelow.closest('.drag-drop-item') : null;
-        
-        document.querySelectorAll('.drag-drop-item').forEach(el => el.classList.remove('drag-over'));
-        if (dropItem && !dropItem.classList.contains('filled')) {
-            dropItem.classList.add('drag-over');
-        }
-        
-        e.preventDefault();
-    }, { passive: false });
-
-    document.addEventListener('touchend', function(e) {
-        if (!touchDragElement) return;
-        
-        const touch = e.changedTouches[0];
-        const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-        const dropItem = elemBelow ? elemBelow.closest('.drag-drop-item') : null;
-
-        touchDragElement.remove();
-        touchDragElement = null;
-        
-        const originalImg = dragLeftArea.querySelector('.drag-image-item[data-idx="' + touchDragSourceIdx + '"]');
-        if (originalImg) originalImg.style.opacity = '1';
-
-        document.querySelectorAll('.drag-drop-item').forEach(el => el.classList.remove('drag-over'));
-
-        if (dropItem && !dropItem.classList.contains('filled')) {
-            const targetWord = dropItem.dataset.word;
-            const isCorrect = (touchDragWord === targetWord);
-            const hasShift = dropItem.classList.contains('drag-item-shift');
-            
-            if (originalImg) {
-                handleDragDropResult(originalImg, dropItem, touchDragSourceIdx, isCorrect, hasShift);
-            }
-        }
-        
-        touchDragWord = null;
-        touchDragSourceIdx = null;
-    });
-}
-
-initTouchDrag();
 </script>
 
 </body>
