@@ -650,22 +650,22 @@ body {
   }
 
   /* --- 6. ИГРА SPELLING --- */
-    .spelling-slots {
+      .spelling-slots {
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
     margin: 8px 0 !important;
-    padding: 0 4px !important;
+    padding: 0 2px !important;
     width: 100% !important;
   }
   
     
-    .spelling-slot {
-    width: 30px !important;
-    height: 34px !important;
-    font-size: 17px !important;
+      .spelling-slot {
+    width: 28px !important;
+    height: 32px !important;
+    font-size: 16px !important;
     border-radius: 7px !important;
     padding: 0 !important;
     flex-shrink: 0 !important;
@@ -673,7 +673,7 @@ body {
     align-items: center !important;
     justify-content: center !important;
   }
-  
+
   /* ИСПРАВЛЕНИЕ: Трек с буквами теперь растягивается */
            .spelling-track {
     height: auto !important;
@@ -686,20 +686,19 @@ body {
     gap: 5px !important;
     overflow: visible !important;
     border-radius: 20px !important;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
   }
   
-    .spelling-track-letter { 
-    width: 30px !important; 
-    height: 30px !important; 
-    font-size: 18px !important; 
+     .spelling-track-letter { 
+    width: 28px !important; 
+    height: 28px !important; 
+    font-size: 16px !important; 
     border-radius: 7px !important;
     flex-shrink: 0 !important;
     position: static !important;
+    box-sizing: border-box !important;
   }
 
-           .spelling-track-letters {
+        .spelling-track-letters {
     position: static !important;
     display: flex !important;
     flex-wrap: wrap !important;
@@ -708,9 +707,9 @@ body {
     gap: 5px !important;
     width: 100% !important;
     height: auto !important;
-    padding: 4px 6px !important;
+    padding: 4px 0 !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
   /* --- 7. ШАПКА --- */
   .score-block, .timer-container { margin: 0 !important; }
