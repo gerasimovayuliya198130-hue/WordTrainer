@@ -1906,6 +1906,7 @@ let dragPlacedCount = 0;
 let dragItemStatus = [];
 let dragItemsData = [];
 let dragLocked = false;
+let dragRunId = 0;
 
 let chooseWords = [];
 let chooseIndex = 0;
@@ -2465,6 +2466,7 @@ gameProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
 
 // ==================== ИГРА 2: DRAG ====================
 function startDragGame(isRetry) {
+dragRunId++;
 if (isRetry) gameScore = phaseStartScore[2] || 0; else phaseStartScore[2] = gameScore;
 const words = currentSessionWords.length > 0 ? currentSessionWords : (currentWords.length > 0 ? currentWords : WORDS_BY_THEME['Animals']);
 dragWords = aiPickAdaptiveWords(currentTheme, words, WORDS_PER_PHASE);
@@ -2578,6 +2580,7 @@ function handleDragDropResult(draggedElement, dropZone, draggedIdx, isCorrect, h
 if (isGameOver) return;
 if (dragLocked) return;
 dragLocked = true;
+const myDragRun = dragRunId;
 stopDragTimer();
 const elapsed = (Date.now() - dragWordStartTime) / 1000;
 aiUpdateWeight(currentTheme, dropZone.dataset.word, isCorrect ? 'correct' : 'wrong', elapsed);
@@ -2603,16 +2606,17 @@ speakWord(draggedElement.dataset.word);
 speakPraise(elapsed);
 dragPlacedCount++;
 gameIndex = dragPlacedCount;
-const globalTaskNumber = getGlobalTaskNumber();
+const globalTaskNumber = Math.min(getGlobalTaskNumber(), WORDS_PER_PHASE * 2);
 dragProgressText.textContent = globalTaskNumber + ' / ' + TOTAL_TASKS;
 dragScoreDisplay.textContent = gameScore;
 
-const globalDone = getGlobalTaskNumber() - 1;
+const globalDone = Math.min(getGlobalTaskNumber(), WORDS_PER_PHASE * 2) - 1;
 const dragProgressPct = (globalDone / TOTAL_TASKS) * 100;
 dragProgress.style.width = dragProgressPct + '%';
 const isLastBatch = (dragPlacedCount >= WORDS_PER_PHASE - 1);
 const delay = isLastBatch ? 2200 : 800;
 setTimeout(() => {
+    if (myDragRun !== dragRunId) return;
     dragLocked = false;
     const allFilled = dragItemStatus.every(s => s === true);
     if (allFilled) {
@@ -2629,10 +2633,10 @@ setTimeout(() => {
         playSound('wrong');
         dropZone.className = 'drag-drop-item wrong';
         setTimeout(() => {
-            // ВОТ ЭТА СТРОКА (стало):
-            const correctWord = draggedElement.dataset.word; 
-            showGameOver(correctWord);
-        }, 800);
+    if (myDragRun !== dragRunId) return;
+    const correctWord = draggedElement.dataset.word; 
+    showGameOver(correctWord);
+}, 800);
     }
 }
 
@@ -2677,8 +2681,9 @@ function showChooseWord() {
   animateRobot('neutral', 3);
 
   const loader = new Image();
-  const proceed = function () {
+    const proceed = function () {
     if (myToken !== chooseRenderToken || isGameOver) return;
+    if (!chooseGameOverlay.classList.contains('active')) return;
     chooseGameImg.src = imgSrc;
     chooseGameImg.alt = item.word;
     chooseGameImg.style.opacity = '1';
@@ -3322,6 +3327,7 @@ updateFooter();
 spellingRunId++;
 chooseRenderToken++;
 dragLocked = false;
+dragRunId++;
 }
 if (learnBackBtn) learnBackBtn.addEventListener('click', goToMenu);
 if (gameBackBtn) gameBackBtn.addEventListener('click', goToMenu);
