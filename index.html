@@ -237,7 +237,7 @@ body {
 .drag-header-left .score-label { font-size: 13px; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; }
 .drag-header-left .score-value { font-size: 28px; font-weight: 800; color: #1a1a2e; line-height: 1; }
 .drag-header-right { display: flex; align-items: flex-start; gap: 10px; flex: 0 0 auto; z-index: 2; }
-.drag-header-right .timer-container { margin-top: 4px; }
+.drag-header-right .timer-container { margin-top: 4px; margin-right: 60px; }
 .drag-robot { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); width: 100px; height: 110px; display: flex; justify-content: center; align-items: center; z-index: 3; }
 .drag-hint-text { color: #666; font-size: 14px; min-height: 18px; margin-bottom: 4px; flex-shrink: 0; }
 .drag-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: visible; padding: 8px; min-height: 0; max-height: 72vh; margin-top: 20px; }
@@ -2632,11 +2632,16 @@ setTimeout(() => {
         animateRobot('sad', 2);
         playSound('wrong');
         dropZone.className = 'drag-drop-item wrong';
+        
+        // ФИКС: возвращаем картинку в исходное состояние, чтобы её можно было снова тащить
+        draggedElement.classList.remove('dragging'); 
+        dragLocked = false; 
+        
         setTimeout(() => {
-    if (myDragRun !== dragRunId) return;
-    const correctWord = draggedElement.dataset.word; 
-    showGameOver(correctWord);
-}, 800);
+            if (myDragRun !== dragRunId) return;
+            const correctWord = draggedElement.dataset.word; 
+            showGameOver(correctWord);
+        }, 800);
     }
 }
 
@@ -2688,16 +2693,32 @@ function showChooseWord() {
     chooseGameImg.alt = item.word;
     chooseGameImg.style.opacity = '1';
 
-    const themeWords = WORDS_BY_THEME[currentTheme] || [];
-    const options = [item.word];
-    const used = new Set([item.word]);
-    const shuffledThemeWords = shuffle([...themeWords]);
-    for (let i = 0; i < shuffledThemeWords.length && options.length < 4; i++) {
-      if (!used.has(shuffledThemeWords[i].word)) {
-        options.push(shuffledThemeWords[i].word);
-        used.add(shuffledThemeWords[i].word);
-      }
+    // Берём слова ТОЛЬКО из текущей сессии (те самые 12 слов)
+const sessionPool = currentSessionWords.length > 0 ? currentSessionWords : WORDS_BY_THEME[currentTheme];
+
+const options = [item.word];
+const used = new Set([item.word]);
+const shuffledSession = shuffle([...sessionPool]);
+
+for (let i = 0; i < shuffledSession.length && options.length < 4; i++) {
+  if (!used.has(shuffledSession[i].word)) {
+    options.push(shuffledSession[i].word);
+    used.add(shuffledSession[i].word);
+  }
+}
+
+// Страховка: если в сессии вдруг меньше 4 слов — добираем из темы,
+// но лучше, чтобы в сессии всегда было минимум 4 слова.
+if (options.length < 4) {
+  const themeWords = WORDS_BY_THEME[currentTheme] || [];
+  const shuffledTheme = shuffle([...themeWords]);
+  for (let i = 0; i < shuffledTheme.length && options.length < 4; i++) {
+    if (!used.has(shuffledTheme[i].word)) {
+      options.push(shuffledTheme[i].word);
+      used.add(shuffledTheme[i].word);
     }
+  }
+}
 
     chooseGameOptions.innerHTML = '';
     shuffle([...options]).forEach(optWord => {
